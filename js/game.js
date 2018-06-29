@@ -4,6 +4,7 @@ var BasicGame = function (game) {};
 BasicGame.Boot = function (game) {};
 var isoGroup;
 
+var tileMap = []; // all tiles in a 3D-tensor
 var tileSize = 55; // half of pixelsize, so half image is drawn in front of other tile
 var hoveredTile; // current tile being hovered
 
@@ -39,6 +40,7 @@ BasicGame.Boot.prototype = {
 		tile.data.y = yy;
 		tile.data.z = zz;
 		//console.log("created tile:", name, xx, tile.x); // note that tile.x is not the same as xx, which is why tile.data.x is created
+		return tile;
 	},
 
 	create: function () {
@@ -51,10 +53,14 @@ BasicGame.Boot.prototype = {
 		// draw starting tiles
 		//var cube;
 		for (var xx = 0; xx < 9; xx++) {
+			tileMap.push([]); // add position for x = 0...1...2...
 			for (var yy = 0; yy < 9; yy++) {
+				tileMap[xx].push([]); // add all y positions for x = 0...1...2
 				// Create a cube using the new game.add.isoSprite factory method at the specified position.
 				// The last parameter is the group you want to add it to (just like game.add.sprite)
-				this.createTile(xx, yy, 0, 'Plains');
+				var tile = this.createTile(xx, yy, 0, 'Plains');
+				tileMap[xx][yy].push([]); // add a list for z = 0 for all x and y positions
+				tileMap[xx][yy][0] = tile; // make tile accessible from its x,y,z data
 
 				/*
 				cube = game.add.isoSprite(xx * tileSize, yy * tileSize, 0, 'Plains', 0, isoGroup);
@@ -73,6 +79,7 @@ BasicGame.Boot.prototype = {
 			}
 		}
 		game.iso.simpleSort(isoGroup);
+		//console.log( tileMap ); // print the 3D tensor
 
 	},
 	update: function () {
@@ -160,7 +167,7 @@ BasicGame.Boot.prototype = {
 			{
 				//console.log('creating tile');
 				this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
-				//game.iso.simpleSort(isoGroup); // needed if added tile doesn't display correctly in 3D space
+				game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 			}
 		}
 		
