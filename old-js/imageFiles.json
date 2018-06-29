@@ -1,0 +1,14 @@
+{
+	"ground": [
+		"/designs/green-city/img/plains.png",
+		"/designs/green-city/img/city.png",
+		"/designs/green-city/img/garbage.png",
+		"/designs/green-city/img/blank-block.png"
+	],
+	"players": [
+		"/designs/green-city/img/plains.png",
+		"/designs/green-city/img/city.png",
+		"/designs/green-city/img/garbage.png",
+		"/designs/green-city/img/blank-block.png"
+	]
+}

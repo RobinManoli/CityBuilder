@@ -1,0 +1,3 @@
+I could not find a way to draw custom tiles on any other layers than the top layer.
+In other words, whenever creating a tower with layers, all layers except the top, for all towers, would use the same tile.
+So if I were to use jsiso, all towers of cities or garbage would have the same, shared look, except for the top of the tower which can be customized.
