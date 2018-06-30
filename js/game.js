@@ -5,12 +5,14 @@ BasicGame.Boot = function (game) {};
 var isoGroup;
 
 var tileMap = []; // all tiles in a 3D-tensor
-var tileSize = 55; // half of pixelsize, so half image is drawn in front of other tile
+var tileSize = 40; // half of pixelsize, so half image is drawn in front of other tile
 var toolTiles = [];
 var hoveredTile; // current tile being hovered
 
 var cursorPos;
 var cursorTool;
+
+var Work = 1;
 
 function defined( variable )
 {
@@ -20,8 +22,9 @@ function defined( variable )
 BasicGame.Boot.prototype = {
 	preload: function () {
 		game.load.image('Plains', 'img/plains.png');
-		game.load.image('Village', 'img/city.png');
-		game.load.image('City', 'img/garbage.png');
+		game.load.image('Village', 'img/village.png');
+		game.load.image('City', 'img/city.png');
+		game.load.image('Garbage', 'img/garbage.png');
 		game.time.advancedTiming = true;
 
 		game.plugins.add(new Phaser.Plugin.Isometric(game));
@@ -33,6 +36,7 @@ BasicGame.Boot.prototype = {
 
 	createTile: function(xx, yy, zz, name) {
 		var tile = game.add.isoSprite(xx * tileSize, yy * tileSize, zz*tileSize, name, 0, isoGroup);
+		//tile.scale.set(1.5, 1.5); // don't scale this as it messes up tile highlighting
 		tile.anchor.set(0.5);
 		tile.inputEnabled = true;
 		tile.events.onInputDown.add(this.clickedTile, this);
@@ -53,8 +57,8 @@ BasicGame.Boot.prototype = {
 	createTool: function(name){
 		if ( toolTiles.indexOf(name) < 0 )
 		{
-			console.log("creating tool:", name);
-			var yy = 120 + (tileSize + 20) * toolTiles.length;
+			//console.log("creating tool:", name);
+			var yy = 120 + (tileSize + 30) * toolTiles.length;
 			var sprite = game.add.sprite( 10, yy, name );
 			sprite.scale.setTo(0.5, 0.5);
 			game.debug.text( name, 10, yy + tileSize + 15 );
@@ -64,7 +68,7 @@ BasicGame.Boot.prototype = {
 			toolTiles.push( name );
 
 			game.add.tween(sprite.scale).from({
-				x:1, y:1
+				x:2, y:2
 			}, 500, Phaser.Easing.Bounce.In, true, 0);
 		}
 	},
@@ -147,12 +151,12 @@ BasicGame.Boot.prototype = {
 		linespacing = 20;
 		yy += linespacing;
 		game.debug.text("FPS: " + game.time.fps || '--', 10, yy, "#a7aebe");
-		yy += linespacing;
-		game.debug.text("Pop: " + stats.population, 10, yy, "#a7aebe");
-		yy += linespacing;
-		game.debug.text("Sci: " + stats.science, 10, yy, "#a7aebe");
-		yy += linespacing;
-		game.debug.text("Pol: " + stats.pollution, 10, yy, "#a7aebe");
+		for (stat in stats)
+		{
+			yy += linespacing;
+			var text = stat + ': ' + stats[stat]
+			game.debug.text(text, 10, yy, "#a7aebe");
+		}
 		yy += linespacing;
 
 		// tooltip
@@ -160,13 +164,77 @@ BasicGame.Boot.prototype = {
 		if (hoveredTile)
 		{
 			var text = hoveredTile.name;
-			game.debug.text(hoveredTile.name, game.input.mousePointer.x, game.input.mousePointer.y);
+			if (cursorTool) text += " -> " + cursorTool.name + ' ' + Work + '/' + tiles[cursorTool.name].work;
+			game.debug.text(text, game.input.mousePointer.x, game.input.mousePointer.y);
 		}
 
 		if (cursorTool)
 		{
 			cursorTool.x = game.input.mousePointer.x;
 			cursorTool.y = game.input.mousePointer.y;
+		}
+	},
+
+	getRandomGridTile: function(x, y, z, name)
+	{
+		// gets a random value for the x/y/z/name that are set to null
+		xx = (x !== null) ? x: Math.floor( Math.random() * tileMap.length );
+		yy = (y !== null) ? y: Math.floor( Math.random() * tileMap[xx].length );
+		zz = (z !== null) ? z: Math.floor( Math.random() * tileMap[xx][yy].length );
+		var gridTile = tileMap[xx][yy][zz];
+
+		if (name !== null && name != gridTile.name)
+		{
+			// try this many times before giving up
+			for (var i=0; i<100; i++)
+			{
+				xx = (x !== null) ? x: Math.floor( Math.random() * tileMap.length );
+				yy = (y !== null) ? y: Math.floor( Math.random() * tileMap[xx].length );
+				zz = (z !== null) ? z: Math.floor( Math.random() * tileMap[xx][yy].length );
+				var gridTile = tileMap[xx][yy][zz];
+				if ( gridTile.name == name ) return gridTile;
+			}
+			return;
+		}
+		//console.log(x, y, z, name);
+		return gridTile;
+	},
+
+	finishRound: function() {
+		var instance = this;
+		//console.log("finished round:");
+		Work = stats.Population;
+
+
+		// apply effects
+		isoGroup.forEach( function(gridTile) {
+			var tile = tiles[ gridTile.name ];
+			//console.log(tile);
+			if (tile.fx) instance.applyFx( tile.fx );
+		});
+
+		// draw excess garbage
+		for ( stats.Garbage; stats.Garbage > 1; stats.Garbage -= 2 )
+		{
+			plainsTile = this.getRandomGridTile(null, null, 0, "Plains");
+			if ( plainsTile )
+			{
+				this.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' );
+			}
+		}
+	},
+
+	applyWork: function( tile ) {
+		//console.log("applying work to tile:", tile);
+		Work -= 1;
+		if (Work == 0) this.finishRound();
+	},
+
+	applyFx: function( fx ) {
+		//console.log("applying fx:", fx);
+		for (var stat in fx)
+		{
+			stats[stat] += fx[stat];
 		}
 	},
 
@@ -186,12 +254,14 @@ BasicGame.Boot.prototype = {
 				this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
 				game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
+				this.applyWork( replacingTile );
+
 				for (var i in replacingTile.unhides)
 				{
 					var hiddenTileName = replacingTile.unhides[i]
 					hiddenTile = tiles[ hiddenTileName ];
 					hiddenTile.hidden = false;
-					console.log( replacingTile.unhides, i, hiddenTile );
+					//console.log( replacingTile.unhides, i, hiddenTile );
 					this.createTool( hiddenTileName );
 				}
 			}
