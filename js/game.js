@@ -45,7 +45,9 @@ BasicGame.Boot.prototype = {
 		tile.data.x = xx;
 		tile.data.y = yy;
 		tile.data.z = zz;
+		tileMap[xx][yy].push(tile); // add tile to gridmap
 
+		game.iso.simpleSort(isoGroup);
 		game.add.tween(tile).from({
 			isoZ: zz*tileSize + 10
 		}, 100 * ((xx + yy) % 10), Phaser.Easing.Quadratic.InOut, true, 0);
@@ -80,16 +82,16 @@ BasicGame.Boot.prototype = {
 		// Provide a 3D position for the cursor
 		cursorPos = new Phaser.Plugin.Isometric.Point3();
 
-		// draw starting tiles
+		// draw starting tiles, and create grid -- but don't add grid tiles here (do it with this.createTile)
 		for (var xx = 0; xx < 9; xx++) {
 			tileMap.push([]); // add position for x = 0...1...2...
 			for (var yy = 0; yy < 9; yy++) {
 				tileMap[xx].push([]); // add all y positions for x = 0...1...2
 				// Create a cube using the new game.add.isoSprite factory method at the specified position.
 				// The last parameter is the group you want to add it to (just like game.add.sprite)
+				tileMap[xx][yy] = []; // add a list for z = 0 for all x and y positions
 				var tile = this.createTile(xx, yy, 0, 'Plains');
-				tileMap[xx][yy].push([]); // add a list for z = 0 for all x and y positions
-				tileMap[xx][yy][0] = tile; // make tile accessible from its x,y,z data
+				//tileMap[xx][yy][0] = tile; // make tile accessible from its x,y,z data // do this in createTile
 
 				/*
 				// Add a slightly different tween to each cube so we can see the depth sorting working more easily.
@@ -99,7 +101,7 @@ BasicGame.Boot.prototype = {
 				*/
 			}
 		}
-		game.iso.simpleSort(isoGroup);
+		//game.iso.simpleSort(isoGroup); // done in createTile
 		//console.log( tileMap ); // print the 3D tensor
 
 		// tool ui
@@ -175,29 +177,26 @@ BasicGame.Boot.prototype = {
 		}
 	},
 
-	getRandomGridTile: function(x, y, z, name)
+	getRandomGridTile: function()
 	{
-		// gets a random value for the x/y/z/name that are set to null
-		xx = (x !== null) ? x: Math.floor( Math.random() * tileMap.length );
-		yy = (y !== null) ? y: Math.floor( Math.random() * tileMap[xx].length );
-		zz = (z !== null) ? z: Math.floor( Math.random() * tileMap[xx][yy].length );
-		var gridTile = tileMap[xx][yy][zz];
+		xx = Math.floor( Math.random() * tileMap.length );
+		yy = Math.floor( Math.random() * tileMap[xx].length );
+		zz = Math.floor( Math.random() * tileMap[xx][yy].length );
+		return tileMap[xx][yy][zz];
+	},
 
-		if (name !== null && name != gridTile.name)
+	getRandomEmptyTile: function()
+	{
+		// try this many times before giving up
+		for (var i=0; i<100; i++)
 		{
-			// try this many times before giving up
-			for (var i=0; i<100; i++)
-			{
-				xx = (x !== null) ? x: Math.floor( Math.random() * tileMap.length );
-				yy = (y !== null) ? y: Math.floor( Math.random() * tileMap[xx].length );
-				zz = (z !== null) ? z: Math.floor( Math.random() * tileMap[xx][yy].length );
-				var gridTile = tileMap[xx][yy][zz];
-				if ( gridTile.name == name ) return gridTile;
-			}
-			return;
+			var gridTile = this.getRandomGridTile();
+			console.log( gridTile, tileMap );
+			// if the z array has length 1 it has only a plains tile, ie it is empty
+			console.log( tileMap[gridTile.data.x][gridTile.data.y].length );
+			if ( tileMap[gridTile.data.x][gridTile.data.y].length === 1 ) return gridTile;
 		}
-		//console.log(x, y, z, name);
-		return gridTile;
+		return;
 	},
 
 	finishRound: function() {
@@ -216,7 +215,7 @@ BasicGame.Boot.prototype = {
 		// draw excess garbage
 		for ( stats.Garbage; stats.Garbage > 1; stats.Garbage -= 2 )
 		{
-			plainsTile = this.getRandomGridTile(null, null, 0, "Plains");
+			plainsTile = this.getRandomEmptyTile();
 			if ( plainsTile )
 			{
 				this.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' );
@@ -252,7 +251,7 @@ BasicGame.Boot.prototype = {
 			{
 				//console.log('creating tile');
 				this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
-				game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
+				//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
 				this.applyWork( replacingTile );
 
