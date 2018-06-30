@@ -2,7 +2,8 @@ var tiles = {};
 
 // icon means whether the tile has a build icon in the ui
 tiles.Plains = { icon:false };
-tiles.Village = { icon:true, buildsOnTopOf:['Plains'] };
+tiles.Village = { icon:true, buildsOnTopOf:['Plains'], unhides:['City'] }; // does not stack
+tiles.City = { icon:true, hidden:true, buildsOnTopOf:['Plains', 'City'], replaces:['Village'] };
 
 /*
 {

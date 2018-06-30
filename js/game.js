@@ -6,6 +6,7 @@ var isoGroup;
 
 var tileMap = []; // all tiles in a 3D-tensor
 var tileSize = 55; // half of pixelsize, so half image is drawn in front of other tile
+var toolTiles = [];
 var hoveredTile; // current tile being hovered
 
 var cursorPos;
@@ -20,6 +21,7 @@ BasicGame.Boot.prototype = {
 	preload: function () {
 		game.load.image('Plains', 'img/plains.png');
 		game.load.image('Village', 'img/city.png');
+		game.load.image('City', 'img/garbage.png');
 		game.time.advancedTiming = true;
 
 		game.plugins.add(new Phaser.Plugin.Isometric(game));
@@ -39,8 +41,32 @@ BasicGame.Boot.prototype = {
 		tile.data.x = xx;
 		tile.data.y = yy;
 		tile.data.z = zz;
+
+		game.add.tween(tile).from({
+			isoZ: zz*tileSize + 10
+		}, 100 * ((xx + yy) % 10), Phaser.Easing.Quadratic.InOut, true, 0);
+
 		//console.log("created tile:", name, xx, tile.x); // note that tile.x is not the same as xx, which is why tile.data.x is created
 		return tile;
+	},
+
+	createTool: function(name){
+		if ( toolTiles.indexOf(name) < 0 )
+		{
+			console.log("creating tool:", name);
+			var yy = 120 + (tileSize + 20) * toolTiles.length;
+			var sprite = game.add.sprite( 10, yy, name );
+			sprite.scale.setTo(0.5, 0.5);
+			game.debug.text( name, 10, yy + tileSize + 15 );
+			sprite.name = name;
+			sprite.inputEnabled = true;
+			sprite.events.onInputDown.add(this.clickedTool, this);
+			toolTiles.push( name );
+
+			game.add.tween(sprite.scale).from({
+				x:1, y:1
+			}, 500, Phaser.Easing.Bounce.In, true, 0);
+		}
 	},
 
 	create: function () {
@@ -51,7 +77,6 @@ BasicGame.Boot.prototype = {
 		cursorPos = new Phaser.Plugin.Isometric.Point3();
 
 		// draw starting tiles
-		//var cube;
 		for (var xx = 0; xx < 9; xx++) {
 			tileMap.push([]); // add position for x = 0...1...2...
 			for (var yy = 0; yy < 9; yy++) {
@@ -63,14 +88,6 @@ BasicGame.Boot.prototype = {
 				tileMap[xx][yy][0] = tile; // make tile accessible from its x,y,z data
 
 				/*
-				cube = game.add.isoSprite(xx * tileSize, yy * tileSize, 0, 'Plains', 0, isoGroup);
-				cube.anchor.set(0.5);
-				cube.inputEnabled = true;
-				cube.events.onInputDown.add(this.clickedTile, this);
-				cube.name = 'Plains';
-1				*/
-
-				/*
 				// Add a slightly different tween to each cube so we can see the depth sorting working more easily.
 				game.add.tween(cube).to({
 					isoZ: 10
@@ -80,6 +97,17 @@ BasicGame.Boot.prototype = {
 		}
 		game.iso.simpleSort(isoGroup);
 		//console.log( tileMap ); // print the 3D tensor
+
+		// tool ui
+		for (var key in tiles)
+		{
+			var tile = tiles[key];
+			//console.log( tile.icon );
+			if ( tile.icon && !tile.hidden )
+			{
+				this.createTool( key );
+			}
+		}
 
 	},
 	update: function () {
@@ -115,28 +143,17 @@ BasicGame.Boot.prototype = {
 		});
 	},
 	render: function () {
-		game.debug.text("FPS: " + game.time.fps || '--', 10, 20, "#a7aebe");
-		game.debug.text("Pop: " + stats.population, 10, 40, "#a7aebe");
-		game.debug.text("Sci: " + stats.science, 10, 60, "#a7aebe");
-		game.debug.text("Pol: " + stats.pollution, 10, 80, "#a7aebe");
-
-		// tool ui
 		var yy = 0;
-		for (key in tiles)
-		{
-			var tile = tiles[key];
-			//console.log( tile.icon );
-			if ( tile.icon )
-			{
-				yy += 200;
-				var sprite = game.add.sprite( 10, yy, key );
-				sprite.scale.setTo(0.5, 0.5);
-				game.debug.text( key, 10, yy + tileSize + 15 );
-				sprite.name = key;
-				sprite.inputEnabled = true;
-				sprite.events.onInputDown.add(this.clickedTool, this);
-			}
-		}
+		linespacing = 20;
+		yy += linespacing;
+		game.debug.text("FPS: " + game.time.fps || '--', 10, yy, "#a7aebe");
+		yy += linespacing;
+		game.debug.text("Pop: " + stats.population, 10, yy, "#a7aebe");
+		yy += linespacing;
+		game.debug.text("Sci: " + stats.science, 10, yy, "#a7aebe");
+		yy += linespacing;
+		game.debug.text("Pol: " + stats.pollution, 10, yy, "#a7aebe");
+		yy += linespacing;
 
 		// tooltip
 		//if (typeof hoveredTile !== 'undefined' && hoveredTile)
@@ -168,6 +185,15 @@ BasicGame.Boot.prototype = {
 				//console.log('creating tile');
 				this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
 				game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
+
+				for (var i in replacingTile.unhides)
+				{
+					var hiddenTileName = replacingTile.unhides[i]
+					hiddenTile = tiles[ hiddenTileName ];
+					hiddenTile.hidden = false;
+					console.log( replacingTile.unhides, i, hiddenTile );
+					this.createTool( hiddenTileName );
+				}
 			}
 		}
 		
