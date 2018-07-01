@@ -2,6 +2,7 @@ https://www.manoli.se/designs/green-city/
 
 change global tiles to tileStats, and implemenet always using tile.data.stats
 refactor game functions for example to create.js, input.js, ...
+update manoli.se favicon as it looks like a no-traffic sign
 
 create awesome tiles:
 	https://icograms.com/icograms-designer.php

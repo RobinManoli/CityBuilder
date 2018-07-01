@@ -12,6 +12,8 @@ var hoveredTile; // current tile being hovered
 var cursorPos;
 var cursorTool;
 
+var keyEsc;
+
 var Work = 1;
 
 function defined( variable )
@@ -25,6 +27,8 @@ BasicGame.Boot.prototype = {
 		game.load.image('Village', 'img/village.png');
 		game.load.image('City', 'img/city.png');
 		game.load.image('Garbage', 'img/garbage.png');
+
+		game.load.image('Cursor', 'img/cursor.png');
 		game.time.advancedTiming = true;
 
 		game.plugins.add(new Phaser.Plugin.Isometric(game));
@@ -112,6 +116,12 @@ BasicGame.Boot.prototype = {
 		//console.log( tileMap ); // print the 3D tensor
 
 		// tool ui
+		// cursor
+		keyEsc = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
+		keyEsc.onDown.add(this.setDefaultTool, this);
+		var btn = game.add.button(10, 100, 'Cursor', this.setDefaultTool, this);
+
+		// buildings
 		for (var key in tiles)
 		{
 			var tile = tiles[key];
@@ -152,6 +162,12 @@ BasicGame.Boot.prototype = {
 				// keep track of hovered tile
 				hoveredTile = tile;
 			}
+
+			if ( !tile.selected && tile.data.workLeft )
+			{
+				console.log( tile );
+				tile.tint = 0xffff00;
+			}
 		});
 	},
 	render: function () {
@@ -173,14 +189,18 @@ BasicGame.Boot.prototype = {
 		{
 			var yyy = 0;
 			var tile = tiles[ hoveredTile.name ];
-			//console.log( tile, hoveredTile );
+			///console.log( tile, hoveredTile );
 			var text = hoveredTile.name;
 			if ( hoveredTile.data.workLeft ) text += ' ' + (tile.work - hoveredTile.data.workLeft) + '/' + tile.work;
 			game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
 			yyy += 20;
 
-			if (cursorTool) text = cursorTool.name + ' ' + Work + '/' + tiles[cursorTool.name].work;
-			game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2 + yyy);
+			if (cursorTool && cursorTool.alive)
+			{
+				//console.log( cursorTool );
+				text = cursorTool.name + ' ' + Work + '/' + tiles[cursorTool.name].work;
+				game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2 + yyy);
+			}
 		}
 
 		if (cursorTool)
@@ -259,7 +279,6 @@ BasicGame.Boot.prototype = {
 		{
 			//console.log( tile.data.workLeft, tile.data.stats, tile.tint);
 			tile.alpha = 1 - tile.data.workLeft / tile.data.stats.work;
-			tile.tint = 0xffff00; // add tint to unfinished tiles - though doesn't seem to work on images from https://publicdomainvectors.org/
 		}
 
 		if (Work == 0) this.finishRound(); // remove this when keypress/button is implemented
@@ -279,39 +298,60 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
-		if (cursorTool && hoveredTile)
-		{
-			var replacedTile = tiles[ hoveredTile.name ];
-			var replacingTile = tiles[ cursorTool.name ];
-			//console.log( replacedTile, replacingTile );
-			if ( replacingTile.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
+		if (hoveredTile)
+			// click tile with active tool/building
+			if (cursorTool && cursorTool.alive)
 			{
-				//console.log('creating tile');
-				var gridTile = this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
-				gridTile.data.workLeft -= 1;
-				//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
-
-				this.applyWork( gridTile, 1 );
-
-				for (var i in replacingTile.unhides)
+				var replacedTile = tiles[ hoveredTile.name ];
+				var replacingTile = tiles[ cursorTool.name ];
+				//console.log( replacedTile, replacingTile );
+				if ( replacingTile.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
 				{
-					var hiddenTileName = replacingTile.unhides[i]
-					hiddenTile = tiles[ hiddenTileName ];
-					hiddenTile.hidden = false;
-					//console.log( replacingTile.unhides, i, hiddenTile );
-					this.createTool( hiddenTileName );
+					//console.log('creating tile');
+					var gridTile = this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
+					gridTile.data.workLeft -= 1;
+					//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
+
+					this.applyWork( gridTile, 1 );
+
+					for (var i in replacingTile.unhides)
+					{
+						var hiddenTileName = replacingTile.unhides[i]
+						hiddenTile = tiles[ hiddenTileName ];
+						hiddenTile.hidden = false;
+						//console.log( replacingTile.unhides, i, hiddenTile );
+						this.createTool( hiddenTileName );
+					}
 				}
 			}
-		}
+
+			// clicked tile with no tool active
+			else
+			{
+				// add work points to building
+			}
 		
 	},
 
 	clickedTool: function(tool, ptr) {
 		//console.log('clickedTool:', tool, cursorTool);
-		if (cursorTool) cursorTool.destroy();
-		cursorTool = game.add.sprite( game.input.mousePointer.x, game.input.mousePointer.y, tool.name );
+		if ( !cursorTool ) cursorTool = game.add.sprite( game.input.mousePointer.x, game.input.mousePointer.y, tool.name );
+		else
+		{
+			cursorTool.loadTexture( tool.name );
+			cursorTool.reset();
+		}
 		cursorTool.name = tool.name;
 		cursorTool.scale.setTo(0.5, 0.5);
+	},
+
+	setDefaultTool: function()
+	{
+		if (cursorTool)
+		{
+			cursorTool.kill();
+			//console.log( cursorTool );
+		}
 	},
 
 	/*tooltip: function(text) {
