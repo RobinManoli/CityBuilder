@@ -257,9 +257,9 @@ BasicGame.Boot.prototype = {
 		}
 		else
 		{
-			console.log( tile.data.workLeft, tile.data.stats, tile.tint);
+			//console.log( tile.data.workLeft, tile.data.stats, tile.tint);
 			tile.alpha = 1 - tile.data.workLeft / tile.data.stats.work;
-			tile.tint = 0xffff00; // add tint to unfinished tiles
+			tile.tint = 0xffff00; // add tint to unfinished tiles - though doesn't seem to work on images from https://publicdomainvectors.org/
 		}
 
 		if (Work == 0) this.finishRound(); // remove this when keypress/button is implemented
