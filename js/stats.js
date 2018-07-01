@@ -3,3 +3,4 @@
 var stats = {};
 stats.Population = 1;
 stats.Garbage = 0;
+stats.Pollution = 0;

@@ -45,7 +45,14 @@ BasicGame.Boot.prototype = {
 		tile.data.x = xx;
 		tile.data.y = yy;
 		tile.data.z = zz;
+		tile.data.stats = tiles[name];
 		tileMap[xx][yy].push(tile); // add tile to gridmap
+
+		if ( tile.data.stats.work )
+		{
+			// set low opacity on creation, since actual opacity will be set when work is applied eg on click
+			tile.alpha = 0.1;
+		}
 
 		game.iso.simpleSort(isoGroup);
 		game.add.tween(tile).from({
@@ -60,7 +67,7 @@ BasicGame.Boot.prototype = {
 		if ( toolTiles.indexOf(name) < 0 )
 		{
 			//console.log("creating tool:", name);
-			var yy = 120 + (tileSize + 30) * toolTiles.length;
+			var yy = 120 + (tileSize + 10) * toolTiles.length;
 			var sprite = game.add.sprite( 10, yy, name );
 			sprite.scale.setTo(0.5, 0.5);
 			game.debug.text( name, 10, yy + tileSize + 15 );
@@ -132,7 +139,6 @@ BasicGame.Boot.prototype = {
 				tile.selected = true;
 				tile.tint = 0x86bfda;
 				game.add.tween(tile).to({ isoZ: 4 + tile.data.z * tileSize}, 200, Phaser.Easing.Quadratic.InOut, true);
-				instance.tooltip('hi');
 			}
 			// If not, revert back to how it was.
 			else if (tile.selected && !inBounds) {
@@ -165,9 +171,16 @@ BasicGame.Boot.prototype = {
 		//if (typeof hoveredTile !== 'undefined' && hoveredTile)
 		if (hoveredTile)
 		{
+			var yyy = 0;
+			var tile = tiles[ hoveredTile.name ];
+			//console.log( tile, hoveredTile );
 			var text = hoveredTile.name;
-			if (cursorTool) text += " -> " + cursorTool.name + ' ' + Work + '/' + tiles[cursorTool.name].work;
-			game.debug.text(text, game.input.mousePointer.x, game.input.mousePointer.y);
+			if ( hoveredTile.data.workLeft ) text += ' ' + (tile.work - hoveredTile.data.workLeft) + '/' + tile.work;
+			game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
+			yyy += 20;
+
+			if (cursorTool) text = cursorTool.name + ' ' + Work + '/' + tiles[cursorTool.name].work;
+			game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2 + yyy);
 		}
 
 		if (cursorTool)
@@ -191,48 +204,72 @@ BasicGame.Boot.prototype = {
 		for (var i=0; i<100; i++)
 		{
 			var gridTile = this.getRandomGridTile();
-			console.log( gridTile, tileMap );
+			//console.log( gridTile, tileMap );
 			// if the z array has length 1 it has only a plains tile, ie it is empty
-			console.log( tileMap[gridTile.data.x][gridTile.data.y].length );
+			//console.log( tileMap[gridTile.data.x][gridTile.data.y].length );
 			if ( tileMap[gridTile.data.x][gridTile.data.y].length === 1 ) return gridTile;
 		}
 		return;
 	},
 
 	finishRound: function() {
-		var instance = this;
 		//console.log("finished round:");
+		var instance = this;
 		Work = stats.Population;
 
 
 		// apply effects
 		isoGroup.forEach( function(gridTile) {
 			var tile = tiles[ gridTile.name ];
-			//console.log(tile);
+			//console.log(gridTile.name, tile);
 			if (tile.fx) instance.applyFx( tile.fx );
 		});
 
+
 		// draw excess garbage
-		for ( stats.Garbage; stats.Garbage > 1; stats.Garbage -= 2 )
+		for ( var i = stats.Garbage; i > 1; i -= 2 )
 		{
-			plainsTile = this.getRandomEmptyTile();
-			if ( plainsTile )
-			{
-				this.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' );
-			}
+			// delay loop to make it easier to see
+			setTimeout( function(){
+				plainsTile = instance.getRandomEmptyTile();
+				if ( plainsTile ) instance.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' )
+				stats.Garbage -= 2;
+			}, 200 * i);
 		}
+
 	},
 
-	applyWork: function( tile ) {
+	applyWork: function( tile, workAmount ) {
+		// applies work to a tile whose tileData.work is set
 		//console.log("applying work to tile:", tile);
-		Work -= 1;
-		if (Work == 0) this.finishRound();
+
+		// init work on tile
+		if ( !tile.data.workLeft && tile.data.workLeft !== 0 ) tile.data.workLeft = tile.data.stats.work;
+
+		Work -= workAmount;
+		tile.data.workLeft -= workAmount;
+
+		if ( tile.data.workLeft <= 0 )
+		{
+			tile.data.workLeft = 0;
+			tile.alpha = 1
+			this.applyFx( tile.data.stats.createdFx );
+		}
+		else
+		{
+			console.log( tile.data.workLeft, tile.data.stats, tile.tint);
+			tile.alpha = 1 - tile.data.workLeft / tile.data.stats.work;
+			tile.tint = 0xffff00; // add tint to unfinished tiles
+		}
+
+		if (Work == 0) this.finishRound(); // remove this when keypress/button is implemented
 	},
 
 	applyFx: function( fx ) {
 		//console.log("applying fx:", fx);
 		for (var stat in fx)
 		{
+			//console.log("applying fx to:", stat, stats[stat], fx[stat]);
 			stats[stat] += fx[stat];
 		}
 	},
@@ -250,10 +287,11 @@ BasicGame.Boot.prototype = {
 			if ( replacingTile.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
 			{
 				//console.log('creating tile');
-				this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
+				var gridTile = this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
+				gridTile.data.workLeft -= 1;
 				//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
-				this.applyWork( replacingTile );
+				this.applyWork( gridTile, 1 );
 
 				for (var i in replacingTile.unhides)
 				{
@@ -276,9 +314,9 @@ BasicGame.Boot.prototype = {
 		cursorTool.scale.setTo(0.5, 0.5);
 	},
 
-	tooltip: function(text) {
+	/*tooltip: function(text) {
 		game.debug.text(text, game.input.mousePointer.x, game.input.mousePointer.y);
-	},
+	},*/
 };
 
 game.state.add('Boot', BasicGame.Boot);
