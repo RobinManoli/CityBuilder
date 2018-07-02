@@ -4,7 +4,7 @@ var BasicGame = function (game) {};
 BasicGame.Boot = function (game) {};
 var isoGroup;
 
-var tileMap = []; // all tiles in a 3D-tensor
+var tileGrid = []; // all tiles in a 3D-tensor
 var tileSize = 40; // half of pixelsize, so half image is drawn in front of other tile
 var toolTiles = [];
 var hoveredTile; // current tile being hovered
@@ -53,7 +53,7 @@ BasicGame.Boot.prototype = {
 		tile.typeData = tileTypeData[name];
 		if ( !tile.typeData.count ) tile.typeData.count = 1;
 		else tile.typeData.count += 1;
-		tileMap[xx][yy].push(tile); // add tile to gridmap
+		tileGrid[xx][yy].push(tile); // add tile to gridmap
 
 		if ( tile.typeData.work )
 		{
@@ -98,14 +98,14 @@ BasicGame.Boot.prototype = {
 
 		// draw starting tiles, and create grid -- but don't add grid tiles here (do it with this.createTile)
 		for (var xx = 0; xx < 5; xx++) {
-			tileMap.push([]); // add position for x = 0...1...2...
+			tileGrid.push([]); // add position for x = 0...1...2...
 			for (var yy = 0; yy < 5; yy++) {
-				tileMap[xx].push([]); // add all y positions for x = 0...1...2
+				tileGrid[xx].push([]); // add all y positions for x = 0...1...2
 				// Create a cube using the new game.add.isoSprite factory method at the specified position.
 				// The last parameter is the group you want to add it to (just like game.add.sprite)
-				tileMap[xx][yy] = []; // add a list for z = 0 for all x and y positions
+				tileGrid[xx][yy] = []; // add a list for z = 0 for all x and y positions
 				var tile = this.createTile(xx, yy, 0, 'Plains');
-				//tileMap[xx][yy][0] = tile; // make tile accessible from its x,y,z data // do this in createTile
+				//tileGrid[xx][yy][0] = tile; // make tile accessible from its x,y,z data // do this in createTile
 
 				/*
 				// Add a slightly different tween to each cube so we can see the depth sorting working more easily.
@@ -116,7 +116,7 @@ BasicGame.Boot.prototype = {
 			}
 		}
 		//game.iso.simpleSort(isoGroup); // done in createTile
-		//console.log( tileMap ); // print the 3D tensor
+		//console.log( tileGrid ); // print the 3D tensor
 
 		// tool ui
 		// cursor
@@ -226,10 +226,10 @@ BasicGame.Boot.prototype = {
 
 	getRandomGridTile: function()
 	{
-		xx = Math.floor( Math.random() * tileMap.length );
-		yy = Math.floor( Math.random() * tileMap[xx].length );
-		zz = Math.floor( Math.random() * tileMap[xx][yy].length );
-		return tileMap[xx][yy][zz];
+		xx = Math.floor( Math.random() * tileGrid.length );
+		yy = Math.floor( Math.random() * tileGrid[xx].length );
+		zz = Math.floor( Math.random() * tileGrid[xx][yy].length );
+		return tileGrid[xx][yy][zz];
 	},
 
 	getRandomEmptyTile: function()
@@ -238,10 +238,10 @@ BasicGame.Boot.prototype = {
 		for (var i=0; i<100; i++)
 		{
 			var gridTile = this.getRandomGridTile();
-			//console.log( gridTile, tileMap );
+			//console.log( gridTile, tileGrid );
 			// if the z array has length 1 it has only a plains tile, ie it is empty
-			//console.log( tileMap[gridTile.data.x][gridTile.data.y].length );
-			if ( tileMap[gridTile.data.x][gridTile.data.y].length === 1 ) return gridTile;
+			//console.log( tileGrid[gridTile.data.x][gridTile.data.y].length );
+			if ( tileGrid[gridTile.data.x][gridTile.data.y].length === 1 ) return gridTile;
 		}
 		return;
 	},
