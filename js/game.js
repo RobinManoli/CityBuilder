@@ -9,14 +9,19 @@ var tileSize = 40; // half of pixelsize, so half image is drawn in front of othe
 var toolTiles = [];
 var hoveredTile; // current tile being hovered
 
+var roundFinishedBackground;
 var toolTipBackground;
 
 var cursorPos;
 var cursorTool;
 
 var keyEsc;
+var keySpace;
 
 var Work = 1;
+var roundFinished = false;
+
+var animatingShowAllTiles = false;
 
 function defined( variable )
 {
@@ -120,10 +125,14 @@ BasicGame.Boot.prototype = {
 		//game.iso.simpleSort(isoGroup); // done in createTile
 		//console.log( tileGrid ); // print the 3D tensor
 
-		// tool ui
-		// cursor
+		// key presses
 		keyEsc = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
 		keyEsc.onDown.add(this.setDefaultTool, this);
+		keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+		keySpace.onDown.add(this.startRound, this);
+
+		// tool ui
+		// cursor
 		var btn = game.add.button(game.width - tileSize - 50, 100, 'Cursor', this.setDefaultTool, this);
 
 		// buildings
@@ -138,7 +147,7 @@ BasicGame.Boot.prototype = {
 		}
 
 		toolTipBackground = new Phaser.Rectangle( 0, 0, 600, 300 ) ;
-
+		roundFinishedBackground = new Phaser.Rectangle( game.width/2 - 200, 80, 400, 40 ) ;
 	},
 	update: function () {
 		var instance = this;
@@ -179,7 +188,7 @@ BasicGame.Boot.prototype = {
 			// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
 			if ( tile.data.z == 0)
 			{
-				if ( hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
+				if ( !animatingShowAllTiles && hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
 				{
 					var z = tileGrid[tile.data.x][tile.data.y];
 					for (var i in z)
@@ -259,7 +268,13 @@ BasicGame.Boot.prototype = {
 				game.debug.text(tooltip[i], toolTipBackground.x + 10, toolTipBackground.y + 20 + 20 * i);
 		}
 		else
-		toolTipBackground.x = 999999;
+			toolTipBackground.x = 999999;
+
+		if (roundFinished)
+		{
+			game.debug.geom( roundFinishedBackground, 'rgba(32,128,0,0.5)');
+			game.debug.text("Round finished - press space", game.width/2 - 150, 100);
+		}
 	},
 
 	getRandomGridTile: function()
@@ -284,10 +299,18 @@ BasicGame.Boot.prototype = {
 		return;
 	},
 
+	startRound: function() {
+		if (roundFinished)
+		{
+			Work = stats.Population;
+			roundFinished = false;
+			animatingShowAllTiles = false; // show all tiles when animating until pressing space
+		}
+	},
+
 	finishRound: function() {
 		//console.log("finished round:");
 		var instance = this;
-		Work = stats.Population;
 
 
 		// apply effects
@@ -299,6 +322,7 @@ BasicGame.Boot.prototype = {
 
 
 		// draw excess garbage
+		animatingShowAllTiles = true;
 		for ( var i = stats.Garbage; i > 1; i -= 2 )
 		{
 			// delay loop to make it easier to see
@@ -308,6 +332,7 @@ BasicGame.Boot.prototype = {
 				stats.Garbage -= 2;
 			}, 200 * i);
 		}
+		game.time.events.add(250 * stats.Garbage, function(){ roundFinished = true; }, this); // after all animations are done
 
 	},
 
@@ -335,7 +360,7 @@ BasicGame.Boot.prototype = {
 			//tile.alpha = 1 - tile.data.workLeft / tile.typeData.work;
 		}
 
-		if (Work == 0) this.finishRound(); // remove this when keypress/button is implemented
+		if (Work == 0) this.finishRound();
 	},
 
 	applyFx: function( fx ) {
@@ -379,7 +404,7 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
-		if (hoveredTile)
+		if (hoveredTile && Work >= 1)
 			// click tile with active tool/building
 			if (cursorTool && cursorTool.alive)
 			{
