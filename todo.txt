@@ -1,8 +1,5 @@
 https://www.manoli.se/designs/green-city/
 
-
-refactor
-	tileMap -> tileGrid
 refactor game functions for example to create.js, input.js, ...
 update manoli.se favicon as it looks like a no-traffic sign
 

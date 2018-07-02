@@ -175,6 +175,23 @@ BasicGame.Boot.prototype = {
 				//console.log( tile );
 				tile.tint = 0xffff00;
 			}
+
+			// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
+			if ( tile.data.z == 0)
+			{
+				if ( hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
+				{
+					var z = tileGrid[tile.data.x][tile.data.y];
+					for (var i in z)
+						z[i].kill();
+				}
+				else
+				{
+					var z = tileGrid[tile.data.x][tile.data.y];
+					for (var i in z)
+						z[i].reset();
+				}
+			}
 		});
 	},
 	render: function () {
@@ -206,10 +223,13 @@ BasicGame.Boot.prototype = {
 			//game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
 			//yyy += 20;
 
-			if (cursorTool && cursorTool.alive)
+			tooltip.push("tile.x: " + hoveredTile.x);
+			tooltip.push("tile.y: " + hoveredTile.y);
+
+			/*if (cursorTool && cursorTool.alive)
 			{
 				//console.log( cursorTool );
-			}
+			}*/
 		}
 
 		else if (cursorTool && cursorTool.alive)
@@ -397,7 +417,7 @@ BasicGame.Boot.prototype = {
 		}
 		cursorTool.name = tool.name;
 		cursorTool.scale.setTo(0.5, 0.5);
-		document.body.style.cursor = 'none';
+		//document.body.style.cursor = 'none'; // hides normal cursor and replaces with sprite, but it makes the cursor feel slow
 	},
 
 	setDefaultTool: function()
@@ -406,7 +426,7 @@ BasicGame.Boot.prototype = {
 		{
 			cursorTool.kill();
 			//console.log( cursorTool );
-			document.body.style.cursor = '';
+			//document.body.style.cursor = ''; // resets cursor, depr
 		}
 	},
 
