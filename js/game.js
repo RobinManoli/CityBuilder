@@ -17,6 +17,8 @@ var cursorTool;
 
 var keyEsc;
 var keySpace;
+var keyShift;
+var shiftDown = false;
 
 var Work = 1;
 var roundFinished = false;
@@ -130,6 +132,9 @@ BasicGame.Boot.prototype = {
 		keyEsc.onDown.add(this.setDefaultTool, this);
 		keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		keySpace.onDown.add(this.startRound, this);
+		keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+		keyShift.onDown.add(function(){ shiftDown = true; }, this);
+		keyShift.onUp.add(function(){ shiftDown = false; }, this);
 
 		// tool ui
 		// cursor
@@ -188,7 +193,7 @@ BasicGame.Boot.prototype = {
 			// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
 			if ( tile.data.z == 0)
 			{
-				if ( !animatingShowAllTiles && hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
+				if ( shiftDown && !animatingShowAllTiles && hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
 				{
 					var z = tileGrid[tile.data.x][tile.data.y];
 					for (var i in z)
@@ -367,6 +372,7 @@ BasicGame.Boot.prototype = {
 		//console.log("applying fx:", fx);
 		for (var stat in fx)
 		{
+			if ( !stats.hasOwnProperty(stat) ) stats[stat] = 0;
 			//console.log("applying fx to:", stat, stats[stat], fx[stat]);
 			stats[stat] += fx[stat];
 		}
