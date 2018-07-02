@@ -50,12 +50,12 @@ BasicGame.Boot.prototype = {
 		tile.data.x = xx;
 		tile.data.y = yy;
 		tile.data.z = zz;
-		tile.data.stats = tileTypeData[name];
-		if ( !tile.data.stats.count ) tile.data.stats.count = 1;
-		else tile.data.stats.count += 1;
+		tile.typeData = tileTypeData[name];
+		if ( !tile.typeData.count ) tile.typeData.count = 1;
+		else tile.typeData.count += 1;
 		tileMap[xx][yy].push(tile); // add tile to gridmap
 
-		if ( tile.data.stats.work )
+		if ( tile.typeData.work )
 		{
 			// set low opacity on creation, since actual opacity will be set when work is applied eg on click
 			tile.alpha = 0.1;
@@ -127,9 +127,9 @@ BasicGame.Boot.prototype = {
 		// buildings
 		for (var key in tileTypeData)
 		{
-			var tile = tileTypeData[key];
-			//console.log( tile.icon );
-			if ( tile.icon && !tile.hidden )
+			var tileType = tileTypeData[key];
+			//console.log( tileType.icon );
+			if ( tileType.icon && !tileType.hidden )
 			{
 				this.createTool( key );
 			}
@@ -191,13 +191,13 @@ BasicGame.Boot.prototype = {
 		var tooltip = [];
 		if (hoveredTile && (!cursorTool || !cursorTool.alive) )
 		{
-			var tile = tileTypeData[ hoveredTile.name ];
-			///console.log( tile, hoveredTile );
+			var tileType = tileTypeData[ hoveredTile.name ];
+			///console.log( tileType, hoveredTile );
 			tooltip.push(hoveredTile.name);
 			if ( hoveredTile.data.workLeft )
 			{
 				tooltip.push('Workforce left: ' + Work);
-				tooltip.push('Work left:' + (tile.work - hoveredTile.data.workLeft) + '/' + tile.work);
+				tooltip.push('Work left:' + (tileType.work - hoveredTile.data.workLeft) + '/' + tileType.work);
 			}
 			//game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
 			//yyy += 20;
@@ -254,9 +254,9 @@ BasicGame.Boot.prototype = {
 
 		// apply effects
 		isoGroup.forEach( function(gridTile) {
-			var tile = tileTypeData[ gridTile.name ];
-			//console.log(gridTile.name, tile);
-			if (tile.fx) instance.applyFx( tile.fx );
+			var tileType = tileTypeData[ gridTile.name ];
+			//console.log(gridTile.name, tileType);
+			if (tileType.fx) instance.applyFx( tileType.fx );
 		});
 
 
@@ -278,7 +278,7 @@ BasicGame.Boot.prototype = {
 		//console.log("applying work to tile:", tile);
 
 		// init work on tile
-		if ( !tile.data.workLeft && tile.data.workLeft !== 0 ) tile.data.workLeft = tile.data.stats.work;
+		if ( !tile.data.workLeft && tile.data.workLeft !== 0 ) tile.data.workLeft = tile.typeData.work;
 
 		Work -= workAmount;
 		tile.data.workLeft -= workAmount;
@@ -287,12 +287,12 @@ BasicGame.Boot.prototype = {
 		{
 			tile.data.workLeft = 0;
 			tile.alpha = 1
-			this.applyFx( tile.data.stats.createdFx );
+			this.applyFx( tile.typeData.createdFx );
 		}
 		else
 		{
-			//console.log( tile.data.workLeft, tile.data.stats, tile.tint);
-			tile.alpha = 1 - tile.data.workLeft / tile.data.stats.work;
+			//console.log( tile.data.workLeft, tile.typeData, tile.tint);
+			tile.alpha = 1 - tile.data.workLeft / tile.typeData.work;
 		}
 
 		if (Work == 0) this.finishRound(); // remove this when keypress/button is implemented
@@ -312,14 +312,14 @@ BasicGame.Boot.prototype = {
 		for (var tile_name in tileTypeData)
 		{
 			var outer_continue = false;
-			var tile = tileTypeData[tile_name];
-			if ( tile.hidden )
+			var tileType = tileTypeData[tile_name];
+			if ( tileType.hidden )
 			{
-				//console.log(tile);
-				for (var required_tile_name in tile.requiredTiles)
+				//console.log(tileType);
+				for (var required_tile_name in tileType.requiredTiles)
 				{
-					var required_tile_count = tile.requiredTiles[required_tile_name];
-					console.log( tile_name, required_tile_name, required_tile_count );
+					var required_tile_count = tileType.requiredTiles[required_tile_name];
+					//console.log( tile_name, required_tile_name, required_tile_count );
 					if ( !tileTypeData[required_tile_name].count || tileTypeData[required_tile_name].count < required_tile_count )
 					{
 						outer_continue = true;
@@ -327,7 +327,7 @@ BasicGame.Boot.prototype = {
 					}
 				}
 				if (outer_continue) continue; // this tile type is not to be unhidden
-				tile.hidden = false;
+				tileType.hidden = false;
 				this.createTool(tile_name);
 				//console.log(tile_name, 'now unhidden');
 			}
@@ -343,10 +343,10 @@ BasicGame.Boot.prototype = {
 			// click tile with active tool/building
 			if (cursorTool && cursorTool.alive)
 			{
-				var replacedTile = tileTypeData[ hoveredTile.name ];
-				var replacingTile = tileTypeData[ cursorTool.name ];
-				//console.log( replacedTile, replacingTile );
-				if ( replacingTile.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
+				var replacedTileType = tileTypeData[ hoveredTile.name ];
+				var replacingTileType = tileTypeData[ cursorTool.name ];
+				//console.log( replacedTileType, replacingTileType );
+				if ( replacingTileType.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
 				{
 					//console.log('creating tile');
 					var gridTile = this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
