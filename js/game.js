@@ -50,7 +50,7 @@ BasicGame.Boot.prototype = {
 		tile.data.x = xx;
 		tile.data.y = yy;
 		tile.data.z = zz;
-		tile.data.stats = tiles[name];
+		tile.data.stats = tileTypeData[name];
 		if ( !tile.data.stats.count ) tile.data.stats.count = 1;
 		else tile.data.stats.count += 1;
 		tileMap[xx][yy].push(tile); // add tile to gridmap
@@ -125,9 +125,9 @@ BasicGame.Boot.prototype = {
 		var btn = game.add.button(game.width - tileSize - 50, 100, 'Cursor', this.setDefaultTool, this);
 
 		// buildings
-		for (var key in tiles)
+		for (var key in tileTypeData)
 		{
-			var tile = tiles[key];
+			var tile = tileTypeData[key];
 			//console.log( tile.icon );
 			if ( tile.icon && !tile.hidden )
 			{
@@ -191,7 +191,7 @@ BasicGame.Boot.prototype = {
 		var tooltip = [];
 		if (hoveredTile && (!cursorTool || !cursorTool.alive) )
 		{
-			var tile = tiles[ hoveredTile.name ];
+			var tile = tileTypeData[ hoveredTile.name ];
 			///console.log( tile, hoveredTile );
 			tooltip.push(hoveredTile.name);
 			if ( hoveredTile.data.workLeft )
@@ -214,7 +214,7 @@ BasicGame.Boot.prototype = {
 			cursorTool.y = game.input.mousePointer.y;
 			tooltip.push('Build: ' + cursorTool.name);
 			tooltip.push('Workforce left: ' + Work);
-			tooltip.push('Work required: ' + tiles[cursorTool.name].work);
+			tooltip.push('Work required: ' + tileTypeData[cursorTool.name].work);
 		}
 		else
 		{
@@ -254,7 +254,7 @@ BasicGame.Boot.prototype = {
 
 		// apply effects
 		isoGroup.forEach( function(gridTile) {
-			var tile = tiles[ gridTile.name ];
+			var tile = tileTypeData[ gridTile.name ];
 			//console.log(gridTile.name, tile);
 			if (tile.fx) instance.applyFx( tile.fx );
 		});
@@ -309,10 +309,10 @@ BasicGame.Boot.prototype = {
 
 	unhideTiles: function() {
 		//console.log();
-		for (var tile_name in tiles)
+		for (var tile_name in tileTypeData)
 		{
 			var outer_continue = false;
-			var tile = tiles[tile_name];
+			var tile = tileTypeData[tile_name];
 			if ( tile.hidden )
 			{
 				//console.log(tile);
@@ -320,7 +320,7 @@ BasicGame.Boot.prototype = {
 				{
 					var required_tile_count = tile.requiredTiles[required_tile_name];
 					console.log( tile_name, required_tile_name, required_tile_count );
-					if ( !tiles[required_tile_name].count || tiles[required_tile_name].count < required_tile_count )
+					if ( !tileTypeData[required_tile_name].count || tileTypeData[required_tile_name].count < required_tile_count )
 					{
 						outer_continue = true;
 						break;
@@ -343,8 +343,8 @@ BasicGame.Boot.prototype = {
 			// click tile with active tool/building
 			if (cursorTool && cursorTool.alive)
 			{
-				var replacedTile = tiles[ hoveredTile.name ];
-				var replacingTile = tiles[ cursorTool.name ];
+				var replacedTile = tileTypeData[ hoveredTile.name ];
+				var replacingTile = tileTypeData[ cursorTool.name ];
 				//console.log( replacedTile, replacingTile );
 				if ( replacingTile.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
 				{

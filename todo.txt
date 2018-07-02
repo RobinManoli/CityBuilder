@@ -1,6 +1,10 @@
 https://www.manoli.se/designs/green-city/
 
-change global tiles to tileStats, and implemenet always using tile.data.stats
+
+refactor
+	usage of tileTypeData mainly via tile.typeData
+	tile should always be a gridTile
+	tileMap -> tileGrid
 refactor game functions for example to create.js, input.js, ...
 update manoli.se favicon as it looks like a no-traffic sign
 
