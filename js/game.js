@@ -9,6 +9,8 @@ var tileSize = 40; // half of pixelsize, so half image is drawn in front of othe
 var toolTiles = [];
 var hoveredTile; // current tile being hovered
 
+var toolTipBackground;
+
 var cursorPos;
 var cursorTool;
 
@@ -58,7 +60,7 @@ BasicGame.Boot.prototype = {
 		if ( tile.typeData.work )
 		{
 			// set low opacity on creation, since actual opacity will be set when work is applied eg on click
-			tile.alpha = 0.1;
+			tile.alpha = 0.25;
 		}
 
 		game.iso.simpleSort(isoGroup);
@@ -135,6 +137,8 @@ BasicGame.Boot.prototype = {
 			}
 		}
 
+		toolTipBackground = new Phaser.Rectangle( 0, 0, 600, 300 ) ;
+
 	},
 	update: function () {
 		var instance = this;
@@ -210,8 +214,8 @@ BasicGame.Boot.prototype = {
 
 		else if (cursorTool && cursorTool.alive)
 		{
-			cursorTool.x = game.input.mousePointer.x;
-			cursorTool.y = game.input.mousePointer.y;
+			cursorTool.x = game.input.mousePointer.x - tileSize/2;
+			cursorTool.y = game.input.mousePointer.y - tileSize/2;
 			tooltip.push('Build: ' + cursorTool.name);
 			tooltip.push('Workforce left: ' + Work);
 			tooltip.push('Work required: ' + tileTypeData[cursorTool.name].work);
@@ -219,9 +223,23 @@ BasicGame.Boot.prototype = {
 		else
 		{
 		}
-		var yyy = 0;
-		for (var i in tooltip)
-			game.debug.text(tooltip[i], game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2 + 20 * i);
+
+		if (tooltip.length)
+		{
+			var yyy = 0;
+			toolTipBackground.x = game.input.mousePointer.x - toolTipBackground.width/2;
+			toolTipBackground.y = game.input.mousePointer.y + tileSize;
+			toolTipBackground.height = tooltip.length * 20 + 10;
+			if (toolTipBackground.x < 0) toolTipBackground.x = 0;
+			else if (toolTipBackground.x > game.width - toolTipBackground.width) toolTipBackground.x = game.width - toolTipBackground.width;
+			if (toolTipBackground.y < 0) toolTipBackground.y = 0;
+			else if (toolTipBackground.y > game.height - toolTipBackground.height) toolTipBackground.y = game.height - toolTipBackground.height;
+			game.debug.geom( toolTipBackground, 'rgba(0,0,32,0.5)');
+			for (var i in tooltip)
+				game.debug.text(tooltip[i], toolTipBackground.x + 10, toolTipBackground.y + 20 + 20 * i);
+		}
+		else
+		toolTipBackground.x = 999999;
 	},
 
 	getRandomGridTile: function()
@@ -292,7 +310,9 @@ BasicGame.Boot.prototype = {
 		else
 		{
 			//console.log( tile.data.workLeft, tile.typeData, tile.tint);
-			tile.alpha = 1 - tile.data.workLeft / tile.typeData.work;
+			var completed = 1 - tile.data.workLeft / tile.typeData.work;
+			tile.alpha = 0.5 + completed / 4; // work in progress will render opacity from 0.5 to 0.75
+			//tile.alpha = 1 - tile.data.workLeft / tile.typeData.work;
 		}
 
 		if (Work == 0) this.finishRound(); // remove this when keypress/button is implemented
@@ -377,6 +397,7 @@ BasicGame.Boot.prototype = {
 		}
 		cursorTool.name = tool.name;
 		cursorTool.scale.setTo(0.5, 0.5);
+		document.body.style.cursor = 'none';
 	},
 
 	setDefaultTool: function()
@@ -385,6 +406,7 @@ BasicGame.Boot.prototype = {
 		{
 			cursorTool.kill();
 			//console.log( cursorTool );
+			document.body.style.cursor = '';
 		}
 	},
 
