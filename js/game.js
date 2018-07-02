@@ -25,6 +25,7 @@ BasicGame.Boot.prototype = {
 	preload: function () {
 		game.load.image('Plains', 'img/plains.png');
 		game.load.image('Village', 'img/village.png');
+		game.load.image('School', 'img/village2.png');
 		game.load.image('City', 'img/city.png');
 		game.load.image('Garbage', 'img/garbage.png');
 
@@ -50,6 +51,8 @@ BasicGame.Boot.prototype = {
 		tile.data.y = yy;
 		tile.data.z = zz;
 		tile.data.stats = tiles[name];
+		if ( !tile.data.stats.count ) tile.data.stats.count = 1;
+		else tile.data.stats.count += 1;
 		tileMap[xx][yy].push(tile); // add tile to gridmap
 
 		if ( tile.data.stats.work )
@@ -72,9 +75,9 @@ BasicGame.Boot.prototype = {
 		{
 			//console.log("creating tool:", name);
 			var yy = 120 + (tileSize + 10) * toolTiles.length;
-			var sprite = game.add.sprite( 10, yy, name );
+			var sprite = game.add.sprite( game.width - tileSize - 50, yy, name );
 			sprite.scale.setTo(0.5, 0.5);
-			game.debug.text( name, 10, yy + tileSize + 15 );
+			//game.debug.text( name, game.width - tileSize, yy + tileSize + 15 );
 			sprite.name = name;
 			sprite.inputEnabled = true;
 			sprite.events.onInputDown.add(this.clickedTool, this);
@@ -94,9 +97,9 @@ BasicGame.Boot.prototype = {
 		cursorPos = new Phaser.Plugin.Isometric.Point3();
 
 		// draw starting tiles, and create grid -- but don't add grid tiles here (do it with this.createTile)
-		for (var xx = 0; xx < 9; xx++) {
+		for (var xx = 0; xx < 5; xx++) {
 			tileMap.push([]); // add position for x = 0...1...2...
-			for (var yy = 0; yy < 9; yy++) {
+			for (var yy = 0; yy < 5; yy++) {
 				tileMap[xx].push([]); // add all y positions for x = 0...1...2
 				// Create a cube using the new game.add.isoSprite factory method at the specified position.
 				// The last parameter is the group you want to add it to (just like game.add.sprite)
@@ -119,7 +122,7 @@ BasicGame.Boot.prototype = {
 		// cursor
 		keyEsc = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
 		keyEsc.onDown.add(this.setDefaultTool, this);
-		var btn = game.add.button(10, 100, 'Cursor', this.setDefaultTool, this);
+		var btn = game.add.button(game.width - tileSize - 50, 100, 'Cursor', this.setDefaultTool, this);
 
 		// buildings
 		for (var key in tiles)
@@ -165,7 +168,7 @@ BasicGame.Boot.prototype = {
 
 			if ( !tile.selected && tile.data.workLeft )
 			{
-				console.log( tile );
+				//console.log( tile );
 				tile.tint = 0xffff00;
 			}
 		});
@@ -185,29 +188,40 @@ BasicGame.Boot.prototype = {
 
 		// tooltip
 		//if (typeof hoveredTile !== 'undefined' && hoveredTile)
-		if (hoveredTile)
+		var tooltip = [];
+		if (hoveredTile && (!cursorTool || !cursorTool.alive) )
 		{
-			var yyy = 0;
 			var tile = tiles[ hoveredTile.name ];
 			///console.log( tile, hoveredTile );
-			var text = hoveredTile.name;
-			if ( hoveredTile.data.workLeft ) text += ' ' + (tile.work - hoveredTile.data.workLeft) + '/' + tile.work;
-			game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
-			yyy += 20;
+			tooltip.push(hoveredTile.name);
+			if ( hoveredTile.data.workLeft )
+			{
+				tooltip.push('Workforce left: ' + Work);
+				tooltip.push('Work left:' + (tile.work - hoveredTile.data.workLeft) + '/' + tile.work);
+			}
+			//game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
+			//yyy += 20;
 
 			if (cursorTool && cursorTool.alive)
 			{
 				//console.log( cursorTool );
-				text = cursorTool.name + ' ' + Work + '/' + tiles[cursorTool.name].work;
-				game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2 + yyy);
 			}
 		}
 
-		if (cursorTool)
+		else if (cursorTool && cursorTool.alive)
 		{
 			cursorTool.x = game.input.mousePointer.x;
 			cursorTool.y = game.input.mousePointer.y;
+			tooltip.push('Build: ' + cursorTool.name);
+			tooltip.push('Workforce left: ' + Work);
+			tooltip.push('Work required: ' + tiles[cursorTool.name].work);
 		}
+		else
+		{
+		}
+		var yyy = 0;
+		for (var i in tooltip)
+			game.debug.text(tooltip[i], game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2 + 20 * i);
 	},
 
 	getRandomGridTile: function()
@@ -293,6 +307,33 @@ BasicGame.Boot.prototype = {
 		}
 	},
 
+	unhideTiles: function() {
+		//console.log();
+		for (var tile_name in tiles)
+		{
+			var outer_continue = false;
+			var tile = tiles[tile_name];
+			if ( tile.hidden )
+			{
+				//console.log(tile);
+				for (var required_tile_name in tile.requiredTiles)
+				{
+					var required_tile_count = tile.requiredTiles[required_tile_name];
+					console.log( tile_name, required_tile_name, required_tile_count );
+					if ( !tiles[required_tile_name].count || tiles[required_tile_name].count < required_tile_count )
+					{
+						outer_continue = true;
+						break;
+					}
+				}
+				if (outer_continue) continue; // this tile type is not to be unhidden
+				tile.hidden = false;
+				this.createTool(tile_name);
+				//console.log(tile_name, 'now unhidden');
+			}
+		}
+	},
+
 	clickedTile: function(tile, ptr) {
 		//console.log('clickedTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
 		//console.log('clickedTile:', hoveredTile);
@@ -313,22 +354,15 @@ BasicGame.Boot.prototype = {
 					//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
 					this.applyWork( gridTile, 1 );
-
-					for (var i in replacingTile.unhides)
-					{
-						var hiddenTileName = replacingTile.unhides[i]
-						hiddenTile = tiles[ hiddenTileName ];
-						hiddenTile.hidden = false;
-						//console.log( replacingTile.unhides, i, hiddenTile );
-						this.createTool( hiddenTileName );
-					}
+					this.unhideTiles();
 				}
 			}
 
 			// clicked tile with no tool active
-			else
+			else if ( tile.data.workLeft )
 			{
 				// add work points to building
+				this.applyWork(tile, 1);
 			}
 		
 	},
