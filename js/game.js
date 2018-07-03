@@ -383,7 +383,7 @@ BasicGame.Boot.prototype = {
 		{
 			tile.data.workLeft = 0;
 			tile.alpha = 1
-			this.applyFx( tile.typeData.createdFx );
+			this.applyFx( tile.typeData.cost );
 		}
 		else
 		{
