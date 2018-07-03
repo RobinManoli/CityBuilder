@@ -22,7 +22,7 @@ var keySpace;
 var keyShift;
 var shiftDown = false;
 
-var Work = 1;
+//var Work = 1;
 var roundFinished = false;
 
 var animatingShowAllTiles = false;
@@ -153,7 +153,7 @@ BasicGame.Boot.prototype = {
 			}
 		}
 
-		toolTipBackground = new Phaser.Rectangle( 0, 0, 600, 300 ) ;
+		toolTipBackground = new Phaser.Rectangle( 0, 0, 400, 300 ) ;
 		roundFinishedBackground = new Phaser.Rectangle( game.width/2 - 200, 80, 400, 40 ) ;
 	},
 	update: function () {
@@ -251,7 +251,7 @@ BasicGame.Boot.prototype = {
 			var tileType = tileTypeData[ hoveredTile.name ];
 			///console.log( tileType, hoveredTile );
 			tooltip.push(hoveredTile.name);
-			tooltip.push('Workforce left: ' + Work);
+			//tooltip.push('Workforce left: ' + Work);
 			if ( hoveredTile.data.workLeft )
 			{
 				tooltip.push("Click to work");
@@ -260,8 +260,8 @@ BasicGame.Boot.prototype = {
 			//game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
 			//yyy += 20;
 
-			tooltip.push("tile.x: " + hoveredTile.x);
-			tooltip.push("tile.y: " + hoveredTile.y);
+			//tooltip.push("tile.x: " + hoveredTile.x);
+			//tooltip.push("tile.y: " + hoveredTile.y);
 
 			/*if (cursorTool && cursorTool.alive)
 			{
@@ -274,7 +274,7 @@ BasicGame.Boot.prototype = {
 			cursorTool.x = game.input.mousePointer.x - tileSize/2;
 			cursorTool.y = game.input.mousePointer.y - tileSize/2;
 			tooltip.push('Build: ' + cursorTool.name);
-			tooltip.push('Workforce left: ' + Work);
+			//tooltip.push('Workforce left: ' + Work);
 			tooltip.push('Work required: ' + tileTypeData[cursorTool.name].work);
 		}
 		else
@@ -330,7 +330,7 @@ BasicGame.Boot.prototype = {
 	startRound: function() {
 		if (roundFinished)
 		{
-			Work = stats.Population;
+			stats.Work += stats.Population;
 			roundFinished = false;
 			animatingShowAllTiles = false; // show all tiles when animating until pressing space
 		}
@@ -376,7 +376,7 @@ BasicGame.Boot.prototype = {
 		// init work on tile
 		if ( !tile.data.workLeft && tile.data.workLeft !== 0 ) tile.data.workLeft = tile.typeData.work;
 
-		Work -= workAmount;
+		stats.Work -= workAmount;
 		tile.data.workLeft -= workAmount;
 
 		if ( tile.data.workLeft <= 0 )
@@ -393,7 +393,7 @@ BasicGame.Boot.prototype = {
 			//tile.alpha = 1 - tile.data.workLeft / tile.typeData.work;
 		}
 
-		if (Work == 0) this.finishRound();
+		if (stats.Work == 0) this.finishRound();
 	},
 
 	applyFx: function( fx ) {
@@ -440,7 +440,7 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
-		if (hoveredTile && Work >= 1)
+		if (hoveredTile && stats.Work >= 1)
 			//console.log("clickedTile", hoveredTile, tile);
 			// click tile with active tool/building
 			if (cursorTool && cursorTool.alive)
