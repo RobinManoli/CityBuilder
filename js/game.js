@@ -24,6 +24,7 @@ var shiftDown = false;
 
 //var Work = 1;
 var roundFinished = false;
+var nRound = 1;
 
 var animatingShowAllTiles = false;
 
@@ -37,8 +38,9 @@ BasicGame.Boot.prototype = {
 		game.load.image('Plains', 'img/plains.png');
 		game.load.image('Village', 'img/village.png');
 		game.load.image('School', 'img/village2.png');
-		game.load.image('City', 'img/city.png');
 		game.load.image('Garbage', 'img/garbage.png');
+		game.load.image('City', 'img/city.png');
+		game.load.image('Recycling', 'img/recycling.png');
 
 		game.load.image('Cursor', 'img/cursor3D.png');
 		game.time.advancedTiming = true;
@@ -62,8 +64,7 @@ BasicGame.Boot.prototype = {
 		tile.data.y = yy;
 		tile.data.z = zz;
 		tile.typeData = tileTypeData[name];
-		if ( !tile.typeData.count ) tile.typeData.count = 1;
-		else tile.typeData.count += 1;
+		if ( !tile.typeData.count ) tile.typeData.count = 0;
 		tileGrid[xx][yy].push(tile); // add tile to gridmap
 
 		if ( tile.typeData.work )
@@ -301,7 +302,7 @@ BasicGame.Boot.prototype = {
 		if (roundFinished)
 		{
 			game.debug.geom( roundFinishedBackground, 'rgba(32,128,0,0.5)');
-			game.debug.text("Round finished - press space", game.width/2 - 150, 100);
+			game.debug.text("Round " + nRound + " finished - press space", game.width/2 - 150, 100);
 		}
 	},
 
@@ -331,6 +332,7 @@ BasicGame.Boot.prototype = {
 		if (roundFinished)
 		{
 			stats.Work += stats.Population;
+			nRound++;
 			roundFinished = false;
 			animatingShowAllTiles = false; // show all tiles when animating until pressing space
 		}
@@ -382,6 +384,7 @@ BasicGame.Boot.prototype = {
 		if ( tile.data.workLeft <= 0 )
 		{
 			tile.data.workLeft = 0;
+			tile.typeData.count++;
 			tile.alpha = 1
 			this.applyFx( tile.typeData.cost );
 		}
@@ -408,7 +411,7 @@ BasicGame.Boot.prototype = {
 		}
 	},
 
-	unhideTiles: function() {
+	unhideTools: function() {
 		//console.log();
 		for (var tile_name in tileTypeData)
 		{
@@ -456,7 +459,6 @@ BasicGame.Boot.prototype = {
 					//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
 					this.applyWork( gridTile, 1 );
-					this.unhideTiles();
 				}
 			}
 
@@ -466,6 +468,9 @@ BasicGame.Boot.prototype = {
 				// add work points to building
 				this.applyWork(hoveredTile, 1);
 			}
+
+			// unhide tools 
+			this.unhideTools();
 		
 	},
 
