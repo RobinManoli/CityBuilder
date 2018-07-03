@@ -65,6 +65,8 @@ BasicGame.Boot.prototype = {
 		tile.data.z = zz;
 		tile.typeData = tileTypeData[name];
 		if ( !tile.typeData.count ) tile.typeData.count = 0;
+		if ( !tile.typeData.tiles ) tile.typeData.tiles = [tile];
+		else tile.typeData.tiles.push( tile );
 		tileGrid[xx][yy].push(tile); // add tile to gridmap
 
 		if ( tile.typeData.work )
@@ -258,6 +260,11 @@ BasicGame.Boot.prototype = {
 				tooltip.push("Click to work");
 				tooltip.push('Work left:' + hoveredTile.data.workLeft + '/' + tileType.work);
 			}
+			else if ( hoveredTile.typeData.click )
+			{
+				tooltip.push("Click to use");
+			}
+
 			//game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
 			//yyy += 20;
 
@@ -278,9 +285,7 @@ BasicGame.Boot.prototype = {
 			//tooltip.push('Workforce left: ' + Work);
 			tooltip.push('Work required: ' + tileTypeData[cursorTool.name].work);
 		}
-		else
-		{
-		}
+
 
 		if (tooltip.length)
 		{
@@ -328,6 +333,46 @@ BasicGame.Boot.prototype = {
 		return;
 	},
 
+	addGarbage: function() {
+		var instance = this;
+		// animate adding garbage
+		animatingShowAllTiles = true;
+		for ( var i = stats.Garbage; i > 1; i -= 2 )
+		{
+			//console.log("Setting garbage timer");
+			// delay loop to make it easier to see
+			setTimeout( function(){
+				//console.log();
+				plainsTile = instance.getRandomEmptyTile();
+				if ( plainsTile ) instance.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' )
+				else
+				{
+					if ( !stats.hasOwnProperty('Pollution') ) stats.Pollution = 0;
+					stats.Pollution++; // found no empty tile, so burn the garbage and create pollution
+				}
+				stats.Garbage -= 2;
+			}, 200 * i);
+		}
+	},
+
+	removeGarbage: function() {
+		var instance = this;
+		// animate removing garbage
+		// animatingShowAllTiles = true;
+		while ( stats.Garbage <= -2 && tileTypeData.Garbage.tiles.length )
+		{
+			// select first created garbage
+			garbageTile = tileTypeData.Garbage.tiles[0];
+			tileTypeData.Garbage.tiles.splice(0, 1) // remove first created garbage
+			//console.log( "Removing garbage tile:", stats.Garbage, garbageTile );
+			var index = garbageTile.data.z;
+			tileGrid[ garbageTile.data.x ][ garbageTile.data.y ].splice(index, 1); // remove tile from grid
+			garbageTile.destroy();
+			stats.Garbage += 2;
+		}
+		if ( stats.Garbage < 0 ) stats.Garbage = 0;
+	},
+
 	startRound: function() {
 		if (roundFinished)
 		{
@@ -349,19 +394,7 @@ BasicGame.Boot.prototype = {
 			if (tileType.fx && !gridTile.data.workLeft) instance.applyFx( tileType.fx );
 		});
 
-		// draw excess garbage
-		animatingShowAllTiles = true;
-		for ( var i = stats.Garbage; i > 1; i -= 2 )
-		{
-			//console.log("Setting garbage timer");
-			// delay loop to make it easier to see
-			setTimeout( function(){
-				//console.log();
-				plainsTile = instance.getRandomEmptyTile();
-				if ( plainsTile ) instance.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' )
-				stats.Garbage -= 2;
-			}, 200 * i);
-		}
+		this.addGarbage();
 
 		// after all animations are done
 		game.time.events.add(250 * stats.Garbage, function(){
@@ -395,8 +428,6 @@ BasicGame.Boot.prototype = {
 			tile.alpha = 0.5 + completed / 4; // work in progress will render opacity from 0.5 to 0.75
 			//tile.alpha = 1 - tile.data.workLeft / tile.typeData.work;
 		}
-
-		if (stats.Work == 0) this.finishRound();
 	},
 
 	applyFx: function( fx ) {
@@ -409,6 +440,8 @@ BasicGame.Boot.prototype = {
 			stats[stat] += fx[stat];
 			i++;
 		}
+
+		this.removeGarbage();
 	},
 
 	unhideTools: function() {
@@ -444,6 +477,7 @@ BasicGame.Boot.prototype = {
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
 		if (hoveredTile && stats.Work >= 1)
+		{
 			//console.log("clickedTile", hoveredTile, tile);
 			// click tile with active tool/building
 			if (cursorTool && cursorTool.alive)
@@ -469,8 +503,21 @@ BasicGame.Boot.prototype = {
 				this.applyWork(hoveredTile, 1);
 			}
 
-			// unhide tools 
-			this.unhideTools();
+			// tile is already built, perform click effects
+			else
+			{
+				if ( hoveredTile.typeData.click )
+				{
+					//console.log("applying click fx for:", hoveredTile);
+					this.applyFx( hoveredTile.typeData.click );
+					stats.Work--;
+				}
+			}
+		}
+
+		// unhide tools 
+		this.unhideTools();
+		if (stats.Work == 0) this.finishRound();
 		
 	},
 
