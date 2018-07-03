@@ -11,6 +11,8 @@ var hoveredTile; // current tile being hovered
 
 var roundFinishedBackground;
 var toolTipBackground;
+var displayedStats = [];
+var displayedStatsTimeStamp = 0;
 
 var cursorPos;
 var cursorTool;
@@ -213,11 +215,31 @@ BasicGame.Boot.prototype = {
 		linespacing = 20;
 		yy += linespacing;
 		game.debug.text("FPS: " + game.time.fps || '--', 10, yy, "#a7aebe");
+		//yy += linespacing;
+		//game.debug.text("FPS: " + game.time.totalElapsedSeconds() || '--', 10, yy, "#a7aebe");
+		//yy += linespacing;
+		//game.debug.text("FPS: " + displayedStatsTimeStamp || '--', 10, yy, "#a7aebe");
+
+		// render stat effects gradually
 		for (stat in stats)
 		{
+			if ( !displayedStats.hasOwnProperty(stat) ) displayedStats[stat] = 0;
+
+			// since the stat change is checked for every stat each frame, only change the stats when spotting a difference
+			// otherwise the update will only happen to the first stat in the array
+			if ( game.time.totalElapsedSeconds() - displayedStatsTimeStamp > 0.3 && displayedStats[stat] != stats[stat])
+			{
+				if ( displayedStats[stat] < stats[stat] ) displayedStats[stat]++;
+				else if (displayedStats[stat] > stats[stat]) displayedStats[stat]--;
+				displayedStatsTimeStamp = game.time.totalElapsedSeconds();
+			}
+
 			yy += linespacing;
-			var text = stat + ': ' + stats[stat]
+			var text = stat + ': ' + displayedStats[stat];
 			game.debug.text(text, 10, yy, "#a7aebe");
+			//yy += linespacing;
+			//var text = stat + ': ' + stats[stat];
+			//game.debug.text(text, 10, yy, "#a7aebe");
 		}
 		yy += linespacing;
 
@@ -329,8 +351,10 @@ BasicGame.Boot.prototype = {
 		animatingShowAllTiles = true;
 		for ( var i = stats.Garbage; i > 1; i -= 2 )
 		{
+			//console.log("Setting garbage timer");
 			// delay loop to make it easier to see
 			setTimeout( function(){
+				//console.log();
 				plainsTile = instance.getRandomEmptyTile();
 				if ( plainsTile ) instance.createTile( plainsTile.data.x, plainsTile.data.y, 1, 'Garbage' )
 				stats.Garbage -= 2;
@@ -374,11 +398,13 @@ BasicGame.Boot.prototype = {
 
 	applyFx: function( fx ) {
 		//console.log("applying fx:", fx);
+		var i = 1;
 		for (var stat in fx)
 		{
 			if ( !stats.hasOwnProperty(stat) ) stats[stat] = 0;
 			//console.log("applying fx to:", stat, stats[stat], fx[stat]);
 			stats[stat] += fx[stat];
+			i++;
 		}
 	},
 
