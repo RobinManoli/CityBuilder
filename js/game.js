@@ -38,7 +38,7 @@ BasicGame.Boot.prototype = {
 		game.load.image('City', 'img/city.png');
 		game.load.image('Garbage', 'img/garbage.png');
 
-		game.load.image('Cursor', 'img/cursor.png');
+		game.load.image('Cursor', 'img/cursor3D.png');
 		game.time.advancedTiming = true;
 
 		game.plugins.add(new Phaser.Plugin.Isometric(game));
@@ -191,7 +191,7 @@ BasicGame.Boot.prototype = {
 			}
 
 			// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
-			if ( tile.data.z == 0)
+			if ( tile.data.z == 0 )
 			{
 				if ( shiftDown && !animatingShowAllTiles && hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
 				{
@@ -229,10 +229,11 @@ BasicGame.Boot.prototype = {
 			var tileType = tileTypeData[ hoveredTile.name ];
 			///console.log( tileType, hoveredTile );
 			tooltip.push(hoveredTile.name);
+			tooltip.push('Workforce left: ' + Work);
 			if ( hoveredTile.data.workLeft )
 			{
-				tooltip.push('Workforce left: ' + Work);
-				tooltip.push('Work left:' + (tileType.work - hoveredTile.data.workLeft) + '/' + tileType.work);
+				tooltip.push("Click to work");
+				tooltip.push('Work left:' + hoveredTile.data.workLeft + '/' + tileType.work);
 			}
 			//game.debug.text(text, game.input.mousePointer.x + tileSize + 5, game.input.mousePointer.y + tileSize / 2);
 			//yyy += 20;
@@ -317,14 +318,12 @@ BasicGame.Boot.prototype = {
 		//console.log("finished round:");
 		var instance = this;
 
-
 		// apply effects
 		isoGroup.forEach( function(gridTile) {
 			var tileType = tileTypeData[ gridTile.name ];
-			//console.log(gridTile.name, tileType);
-			if (tileType.fx) instance.applyFx( tileType.fx );
+			//console.log(gridTile, tileType);
+			if (tileType.fx && !gridTile.data.workLeft) instance.applyFx( tileType.fx );
 		});
-
 
 		// draw excess garbage
 		animatingShowAllTiles = true;
@@ -337,7 +336,12 @@ BasicGame.Boot.prototype = {
 				stats.Garbage -= 2;
 			}, 200 * i);
 		}
-		game.time.events.add(250 * stats.Garbage, function(){ roundFinished = true; }, this); // after all animations are done
+
+		// after all animations are done
+		game.time.events.add(250 * stats.Garbage, function(){
+	
+			roundFinished = true;
+		}, this);
 
 	},
 
@@ -411,6 +415,7 @@ BasicGame.Boot.prototype = {
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
 		if (hoveredTile && Work >= 1)
+			//console.log("clickedTile", hoveredTile, tile);
 			// click tile with active tool/building
 			if (cursorTool && cursorTool.alive)
 			{
@@ -430,10 +435,10 @@ BasicGame.Boot.prototype = {
 			}
 
 			// clicked tile with no tool active
-			else if ( tile.data.workLeft )
+			else if ( hoveredTile.data.workLeft )
 			{
 				// add work points to building
-				this.applyWork(tile, 1);
+				this.applyWork(hoveredTile, 1);
 			}
 		
 	},
