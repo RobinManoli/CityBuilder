@@ -1,8 +1,15 @@
 https://www.manoli.se/designs/green-city/
 
-refactor game functions for example to create.js, input.js, ...
-removing garbage destroys the tile, but it still exists
 update manoli.se favicon as it looks like a no-traffic sign
 
 create awesome tiles:
 	https://icograms.com/icograms-designer.php
+
+optimization
+	removing garbage destroys the tile, but it still exists
+	spritesheet
+
+ipad acclimatization
+	slider for hiding tiles
+	highlight selected tool
+	click tool type to switch selected tool
