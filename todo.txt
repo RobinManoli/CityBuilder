@@ -6,7 +6,7 @@ create awesome tiles:
 	https://icograms.com/icograms-designer.php
 
 optimization
-	removing garbage destroys the tile, but it still exists
+	removing garbage destroys the tile, but it still exists - upgrade to latest phaser?
 	spritesheet
 
 ipad acclimatization

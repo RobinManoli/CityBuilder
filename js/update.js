@@ -1,6 +1,12 @@
 function updateFunc(game)
 {
 	var instance = this;
+
+	// slider extremes must be calculated before acting upton them (ie hiding tiles)
+	slider.x = sliderX;
+	if (slider.y < sliderYMin) slider.y = sliderYMin;
+	else if (slider.y > sliderYMax) slider.y = sliderYMax;
+
 	// Update the cursor position.
 	// It's important to understand that screen-to-isometric projection means you have to specify a z position manually, as this cannot be easily
 	// determined from the 2D pointer position without extra trickery. By default, the z position is 0 if not set.
@@ -38,7 +44,8 @@ function updateFunc(game)
 		// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
 		if ( tile.data.z == 0 )
 		{
-			if ( shiftDown && !animatingShowAllTiles && hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
+			//if ( shiftDown && !animatingShowAllTiles && hoveredTile && tile.y - tileSize > game.input.mousePointer.y )
+			if ( !animatingShowAllTiles && tile.y - tileSize > slider.y )
 			{
 				var z = tileGrid[tile.data.x][tile.data.y];
 				for (var i in z)

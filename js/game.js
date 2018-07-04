@@ -14,13 +14,14 @@ var toolTipBackground;
 var displayedStats = [];
 var displayedStatsTimeStamp = 0;
 
-var cursorPos;
-var cursorTool;
+var cursorPos, cursorTool;
+
+var slider, sliderX, sliderYMin, sliderYMax;
 
 var keyEsc;
 var keySpace;
 var keyShift;
-var shiftDown = false;
+//var shiftDown = false;
 
 //var Work = 1;
 var roundFinished = false;
@@ -35,6 +36,9 @@ function defined( variable )
 
 BasicGame.Boot.prototype = {
 	preload: preloadFunc,
+	create: createFunc,
+	update: updateFunc,
+	render: renderFunc,
 
 	createTile: function(xx, yy, zz, name) {
 		var tile = game.add.isoSprite(xx * tileSize, yy * tileSize, zz*tileSize, name, 0, isoGroup);
@@ -86,10 +90,6 @@ BasicGame.Boot.prototype = {
 			}, 500, Phaser.Easing.Bounce.In, true, 0);
 		}
 	},
-
-	create: createFunc,
-	update: updateFunc,
-	render: renderFunc,
 
 	getRandomGridTile: function()
 	{
