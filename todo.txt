@@ -10,6 +10,6 @@ optimization
 	spritesheet
 
 ipad acclimatization
-	slider for hiding tiles
+	add clickable objects before keyboard shortcuts
 	highlight selected tool
 	click tool type to switch selected tool

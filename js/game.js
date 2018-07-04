@@ -19,8 +19,8 @@ var cursorPos, cursorTool;
 var slider, sliderX, sliderYMin, sliderYMax;
 
 var keyEsc;
-var keySpace;
-var keyShift;
+//var keySpace;
+//var keyShift;
 //var shiftDown = false;
 
 //var Work = 1;
@@ -137,8 +137,6 @@ BasicGame.Boot.prototype = {
 
 	removeGarbage: function() {
 		var instance = this;
-		// animate removing garbage
-		// animatingShowAllTiles = true;
 		while ( stats.Garbage <= -2 && tileTypeData.Garbage.tiles.length )
 		{
 			// select first created garbage
@@ -164,7 +162,7 @@ BasicGame.Boot.prototype = {
 	},
 
 	finishRound: function() {
-		//console.log("finished round:");
+		console.log("finishing round:", roundFinished);
 		var instance = this;
 
 		// apply effects
@@ -178,7 +176,6 @@ BasicGame.Boot.prototype = {
 
 		// after all animations are done
 		game.time.events.add(250 * stats.Garbage, function(){
-	
 			roundFinished = true;
 		}, this);
 
@@ -255,6 +252,7 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
+		if (roundFinished) return; // don't do anything when clicking a tile until next round has started
 
 		if (hoveredTile && stats.Work >= 1)
 		{

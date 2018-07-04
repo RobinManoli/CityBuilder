@@ -1,5 +1,6 @@
 function createFunc(game)
 {
+	instance = this;
 	// Create a group for our tiles, so we can use Group.sort
 	isoGroup = game.add.group();
 
@@ -36,11 +37,15 @@ function createFunc(game)
 	// key presses
 	keyEsc = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
 	keyEsc.onDown.add(this.setDefaultTool, this);
-	keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	keySpace.onDown.add(this.startRound, this);
+	//keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	//keySpace.onDown.add(this.startRound, this);
 	//keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
 	//keyShift.onDown.add(function(){ shiftDown = true; }, this);
 	//keyShift.onUp.add(function(){ shiftDown = false; }, this);
+
+	// (non sprite/clickable object) clicks
+	// click anywhere
+	window.addEventListener("click", function(){ if (!hoveredTile) instance.startRound()});
 
 	// tool ui
 	// cursor

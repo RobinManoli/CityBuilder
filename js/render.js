@@ -93,6 +93,6 @@ function renderFunc(game)
 	if (roundFinished)
 	{
 		game.debug.geom( roundFinishedBackground, 'rgba(0,0,255,0.3)');
-		game.debug.text("Round " + nRound + " finished - Press space", game.width/2 - 150, 105);
+		game.debug.text("Round " + nRound + " finished", game.width/2 - 90, 105);
 	}
 }
