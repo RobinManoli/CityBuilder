@@ -2,6 +2,9 @@ https://www.manoli.se/designs/green-city/
 
 update manoli.se favicon as it looks like a no-traffic sign
 
+clean up
+	tooltips (commented code)
+
 refactor
 	remove tileData.click and add 1 employeee automatically on creation of tile
 	employees are lost if there is not enough workforce
@@ -13,8 +16,10 @@ create awesome tiles:
 optimization
 	removing garbage destroys the tile, but it still exists - upgrade to latest phaser?
 	spritesheet
+	test remove jquery if using bootstrap-vue
 
 ipad acclimatization
 	add clickable objects before keyboard shortcuts
+	drag tool to place it, but if it's difficult to drag don't place it - instead create a place tool with arrows around to easily move the placement to the side
 	highlight selected tool
 	click tool type to switch selected tool

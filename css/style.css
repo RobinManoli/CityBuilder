@@ -19,3 +19,7 @@ html{
 
 /* xl */
 @media (min-width: 1200px) {}
+
+
+.modal-body img{ margin:1em; }
+#build-tools img{ margin:0; cursor:pointer; }

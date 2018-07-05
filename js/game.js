@@ -163,7 +163,7 @@ BasicGame.Boot.prototype = {
 	},
 
 	finishRound: function() {
-		console.log("finishing round:", roundFinished);
+		//console.log("finishing round:", roundFinished);
 		var instance = this;
 
 		// apply effects
@@ -254,12 +254,6 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
-		if (hoveredTile)
-		{
-			console.log(hoveredTile);
-			modalFunc( hoveredTile.name );
-		}
-
 		if (roundFinished) return; // don't do anything when clicking a tile until next round has started
 
 		if (hoveredTile && stats.Work >= 1)
@@ -295,9 +289,11 @@ BasicGame.Boot.prototype = {
 				if ( hoveredTile.typeData.click )
 				{
 					//console.log("applying click fx for:", hoveredTile);
-					this.applyFx( hoveredTile.typeData.click );
-					stats.Work--;
+					//this.applyFx( hoveredTile.typeData.click );
+					//stats.Work--;
 				}
+				//modalFunc( hoveredTile.name );
+				document.getElementById('tileInfoLauncher').click();
 			}
 		}
 

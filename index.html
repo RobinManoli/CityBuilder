@@ -14,6 +14,8 @@
  
 <body>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+	<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"/>
+
 
 	<!-- phaser version compatible to isometric plugin -->
 	<script src="//cdnjs.cloudflare.com/ajax/libs/phaser/2.1.1/phaser.min.js"></script>
@@ -30,18 +32,30 @@
 	<script src="js/update.js"></script>
 	<script src="js/render.js"></script>
 
-	<script src="js/bootstrap-ui.js"></script>
-
 	<script src="js/game.js"></script>
 
 	<div id="game"></div>
-	<div id="tile-info"></div>
-
-
+	<!--<div id="tile-info"></div>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+	<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>-->
 
+	<script src="https://unpkg.com/vue"></script>
+	<script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+	<script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+
+	<div id="vue-app">
+ 		<b-btn id="tileInfoLauncher" v-b-modal.tileinfo @click="setHoveredTile" style="display:none;"></b-btn>
+
+		<!-- Modal Component -->
+		<b-modal id="tileinfo" v-bind:title="hoveredTile.name" hide-footer>
+			<img v-bind:src="spriteData[hoveredTile.name]">
+			<br>
+			<b-button size="sm" variant="outline-primary">-</b-button>
+			<b-button size="sm" variant="outline-primary">+</b-button>
+		</b-modal>
+	</div>
+	<script src="js/bootstrap-ui.js"></script>
 </body>
 </html>

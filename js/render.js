@@ -73,7 +73,7 @@ function renderFunc(game)
 	}
 
 
-	if (tooltip.length)
+	if (tooltip.length && false)
 	{
 		var yyy = 0;
 		toolTipBackground.x = game.input.mousePointer.x - toolTipBackground.width/2;

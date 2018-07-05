@@ -1,14 +1,3 @@
-var spriteData = {};
-
-spriteData.Plains = 'img/plains.png';
-spriteData.Village = 'img/village.png';
-spriteData.School = 'img/school.png';
-spriteData.Garbage = 'img/garbage.png';
-spriteData.City = 'img/city.png';
-spriteData.Recycling = 'img/recycling.png';
-
-spriteData.Cursor = 'img/cursor3D.png';
-
 function preloadFunc(game)
 {
 	for (var sprite_name in spriteData) game.load.image(sprite_name, spriteData[sprite_name]);
