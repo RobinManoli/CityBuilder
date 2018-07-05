@@ -8,7 +8,8 @@ function createFunc(game)
 	cursorPos = new Phaser.Plugin.Isometric.Point3();
 
 	sliderX = game.width/2;
-	sliderYMin = sliderYMax = game.height/2;
+	sliderYMin = game.height;
+	sliderYMax = 0;
 	// draw starting tiles, and create grid -- but don't add grid tiles here (do it with this.createTile)
 	for (var xx = 0; xx < 5; xx++) {
 		tileGrid.push([]); // add position for x = 0...1...2...
@@ -19,7 +20,7 @@ function createFunc(game)
 			tileGrid[xx][yy] = []; // add a list for z = 0 for all x and y positions
 			var tile = this.createTile(xx, yy, 0, 'Plains');
 			sliderYMin = Math.min(sliderYMin, tile.y - tileSize); // sliderYMin must allow only top tile to be visible, but never hide it
-			sliderYMax = Math.max(sliderYMax, tile.y);
+			sliderYMax = Math.max(sliderYMax, tile.y - tileSize/2);
 			sliderX = Math.max(sliderX, tile.x + tileSize * 2);
 			//tileGrid[xx][yy][0] = tile; // make tile accessible from its x,y,z data // do this in createTile
 
@@ -68,7 +69,7 @@ function createFunc(game)
 
 	var sliderRect = game.add.graphics(999999, 999999);
 	sliderRect.beginFill(0x0000FF);
-	sliderRect.drawRect(0, 0, 20, tileSize);
+	sliderRect.drawRect(0, 0, 30, tileSize * 2);
 	//slider = new Phaser.Rectangle( game.width - tileSize * 3, ymax, 20, 60);
 
 	slider = game.add.sprite(sliderX, sliderYMax, sliderRect.generateTexture());
