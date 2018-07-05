@@ -1,0 +1,21 @@
+/* xs */
+/* since the canvas makes the viewport quite big, the text becomes too small on mobile, so size it (default size is 16px)*/
+html{
+	font-size: 32px;
+} 
+
+/* sm */
+@media (min-width: 576px) {
+	html{
+		font-size: 16px;
+	} 
+}
+
+/* md */
+@media (min-width: 768px) {}
+
+/* lg */
+@media (min-width: 992px) {}
+
+/* xl */
+@media (min-width: 1200px) {}

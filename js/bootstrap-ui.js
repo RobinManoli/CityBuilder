@@ -15,6 +15,11 @@ function modalFunc(tile_name)
 					<div class="modal-body">
 						<img src="${ spriteData[tile_name]} ">
 						On plains you can build anything.
+						<div class="d-block d-sm-none">XS</div>
+						<div class="d-none d-sm-block d-md-none">SM</div>
+						<div class="d-none d-md-block d-lg-none">MD</div>
+						<div class="d-none d-lg-block d-xl-none">LG</div>
+						<div class="d-none d-xl-block">XL</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -27,3 +32,12 @@ function modalFunc(tile_name)
 	$('#tile-info .modal').modal('toggle');
 }
 
+/*
+function resizeGame() {
+    game.scale.setGameSize($( window ).width(), $( window ).height());
+}
+
+$( window ).resize(function() {
+    resizeGame();
+}); 
+*/
