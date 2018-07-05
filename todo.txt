@@ -2,6 +2,11 @@ https://www.manoli.se/designs/green-city/
 
 update manoli.se favicon as it looks like a no-traffic sign
 
+refactor
+	remove tileData.click and add 1 employeee automatically on creation of tile
+	employees are lost if there is not enough workforce
+	apply fx from employees at end of round, after workforce is distributed
+
 create awesome tiles:
 	https://icograms.com/icograms-designer.php
 

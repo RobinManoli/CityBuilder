@@ -1,5 +1,6 @@
 //var game = new Phaser.Game(800, 400, Phaser.AUTO, 'test', null, true, false);
-var game = new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.AUTO, 'game');
+//var game = new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.AUTO, 'game');
+var game = new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.CANVAS, 'game'); // auto makes page not even work on mobile
 var BasicGame = function (game) {};
 BasicGame.Boot = function (game) {};
 var isoGroup;
@@ -252,6 +253,13 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
+
+		if (hoveredTile)
+		{
+			console.log(hoveredTile);
+			modalFunc( hoveredTile.name );
+		}
+
 		if (roundFinished) return; // don't do anything when clicking a tile until next round has started
 
 		if (hoveredTile && stats.Work >= 1)
@@ -329,4 +337,3 @@ BasicGame.Boot.prototype = {
 
 game.state.add('Boot', BasicGame.Boot);
 game.state.start('Boot');
-
