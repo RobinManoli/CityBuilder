@@ -307,7 +307,7 @@ BasicGame.Boot.prototype = {
 	},
 
 	enableDisableTile: function() {
-		//console.log('enableDisableTile');
+		//console.log('enableDisableTile', hoveredTile, hoveredTile.typeData.disablable);
 		if (hoveredTile && hoveredTile.typeData.disablable)
 		{
 			hoveredTile.data.disabled = !hoveredTile.data.disabled;

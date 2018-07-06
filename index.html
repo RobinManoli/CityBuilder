@@ -52,7 +52,8 @@
 		<b-modal id="tileinfo" ref="tileinfo" v-bind:title="hoveredTile.name" hide-footer>
 			<img v-bind:src="spriteData[hoveredTile.name]">
 			<br>
-			<b-form-checkbox v-model="tileEnabled" ref="tileEnabledCheckbox" @change="updateTileEnabled()" v-show="hoveredTile && hoveredTile.typeData && hoveredTile.typeData.disablable">Employ</b-form-checkbox>
+			<b-button v-show="hoveredTile && hoveredTile.typeData && hoveredTile.typeData.disablable" v-bind:variant="conditionalPressedButtonVariant(tileEnabled)" :pressed="tileEnabled" @click="updateTileEnabled()">Employ</b-button>
+
 			<!--<b-button size="sm" variant="outline-primary">-</b-button>
 			<b-button size="sm" variant="outline-primary">+</b-button>-->
 		</b-modal>

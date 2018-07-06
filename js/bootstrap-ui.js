@@ -81,21 +81,17 @@ function modalFunc(tile_name)
 				else
 					clickTimer = setTimeout( function(){ instance.$refs.tileinfo.show(); clickTimer=false }, 300 );
 		},
+		conditionalPressedButtonVariant( val ){
+			// returns a button variant (color) that visibly holds button pressed or unpressed
+			if (val) return "success"
+			return "outline-danger"
+		},
 		updateTileEnabled() {
-			console.log( this.hoveredTile.data.disabled, this.tileEnabled);
-			this.gameFuncs.enableDisableTile();
-			if (this.tileEnabled == this.hoveredTile.data.disabled )
-			{
-				// toggle back value here, if enabling is not possible
-				// tried millions of things, none working
-
-				//console.log( this.$refs.tileEnabledCheckbox.$el.checked );
-				//console.log('re-clicked');
-				//this.tileEnabled = !this.tileEnabled;
-				//this.$refs.tileEnabledCheckbox.$el.click();
-			}
 			console.log( this.hoveredTile.data.disabled, this.tileEnabled );
-			//console.log( this.$refs.tileEnabledCheckbox );
+			this.gameFuncs.enableDisableTile();
+			this.tileEnabled = !this.hoveredTile.data.disabled;
+			if (this.tileEnabled) this.tileEnabledVariant = "outline-primary";
+			else this.tileEnabledVariant = "outline-success";
 		},
 	}
 	})
