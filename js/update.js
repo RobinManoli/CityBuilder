@@ -40,6 +40,10 @@ function updateFunc(game)
 			//console.log( tile );
 			tile.tint = 0xffff00;
 		}
+		else if ( !tile.selected && tile.data.disabled )
+		{
+			tile.tint = 0x999999;
+		}
 
 		// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
 		if ( tile.data.z == 0 )

@@ -3,7 +3,9 @@ https://www.manoli.se/designs/green-city/
 update manoli.se favicon as it looks like a no-traffic sign
 
 clean up
-	tooltips (commented code)
+	tooltips (commented code) - thought might want hovering info with keyboard shortcuts
+	bootstrap modal vanilla-js or bootstrap-vue
+	typedata.click
 
 refactor
 	remove tileData.click and add 1 employeee automatically on creation of tile

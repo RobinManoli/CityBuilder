@@ -15,7 +15,7 @@ var toolTipBackground;
 var displayedStats = [];
 var displayedStatsTimeStamp = 0;
 
-var cursorPos, cursorTool;
+var cursorPos, cursorTool, clickTimer;
 
 var slider, sliderX, sliderYMin, sliderYMax;
 
@@ -153,12 +153,18 @@ BasicGame.Boot.prototype = {
 	},
 
 	startRound: function() {
+		var instance = this;
 		if (roundFinished)
 		{
 			stats.Work += stats.Population;
 			nRound++;
 			roundFinished = false;
 			animatingShowAllTiles = false; // show all tiles when animating until pressing space
+
+			// remove designated work from workforce, and disable tiles if necessary
+			isoGroup.forEach( function(tile) {
+				instance.designateWorkOrDisableTile(tile);
+			});
 		}
 	},
 
@@ -170,7 +176,10 @@ BasicGame.Boot.prototype = {
 		isoGroup.forEach( function(gridTile) {
 			var tileType = tileTypeData[ gridTile.name ];
 			//console.log(gridTile, tileType);
-			if (tileType.fx && !gridTile.data.workLeft) instance.applyFx( tileType.fx );
+			if (tileType.fx && !gridTile.data.workLeft && !gridTile.data.disabled)
+			{
+				instance.applyFx( tileType.fx );
+			}
 		});
 
 		this.addGarbage();
@@ -215,7 +224,7 @@ BasicGame.Boot.prototype = {
 		{
 			if ( !stats.hasOwnProperty(stat) ) stats[stat] = 0;
 			//console.log("applying fx to:", stat, stats[stat], fx[stat]);
-			stats[stat] += fx[stat];
+			if ( stat != 'Work' ) stats[stat] += fx[stat]; // Work is designated so not applied here
 			i++;
 		}
 
@@ -253,39 +262,43 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
-
 		if (roundFinished) return; // don't do anything when clicking a tile until next round has started
 
-		if (hoveredTile && stats.Work >= 1)
+		if (hoveredTile)
 		{
-			//console.log("clickedTile", hoveredTile, tile);
-			// click tile with active tool/building
-			if (cursorTool && cursorTool.alive)
+			if (stats.Work >= 1)
 			{
-				var replacedTileType = tileTypeData[ hoveredTile.name ];
-				var replacingTileType = tileTypeData[ cursorTool.name ];
-				//console.log( replacedTileType, replacingTileType );
-				if ( replacingTileType.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
+				//console.log("clickedTile", hoveredTile, tile);
+				// click tile with active tool/building
+				if (cursorTool && cursorTool.alive)
 				{
-					//console.log('creating tile');
-					var gridTile = this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
-					gridTile.data.workLeft -= 1;
-					//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
+					var replacedTileType = tileTypeData[ hoveredTile.name ];
+					var replacingTileType = tileTypeData[ cursorTool.name ];
+					//console.log( replacedTileType, replacingTileType );
+					if ( replacingTileType.buildsOnTopOf.indexOf(hoveredTile.name) >= 0 )
+					{
+						//console.log('creating tile');
+						var gridTile = this.createTile( hoveredTile.data.x, hoveredTile.data.y, hoveredTile.data.z + 1, cursorTool.name );
+						gridTile.data.workLeft -= 1;
+						//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
-					this.applyWork( gridTile, 1 );
+						this.applyWork( gridTile, 1 );
+						this.designateWorkOrDisableTile( gridTile );
+					}
+				}
+
+				// clicked tile with no tool active
+				else if ( hoveredTile.data.workLeft )
+				{
+					// add work points to building
+					this.applyWork(hoveredTile, 1);
 				}
 			}
 
-			// clicked tile with no tool active
-			else if ( hoveredTile.data.workLeft )
-			{
-				// add work points to building
-				this.applyWork(hoveredTile, 1);
-			}
-
 			// tile is already built, perform click effects
-			else
+			if (!cursorTool || !cursorTool.alive)
 			{
+				//console.log(clickTimer);
 				if ( hoveredTile.typeData.click )
 				{
 					//console.log("applying click fx for:", hoveredTile);
@@ -301,6 +314,26 @@ BasicGame.Boot.prototype = {
 		this.unhideTools();
 		if (stats.Work == 0) this.finishRound();
 		
+	},
+
+	enableDisableTile: function() {
+		console.log('enableDisableTile');
+		if (hoveredTile && hoveredTile.typeData.disablable)
+		{
+			hoveredTile.data.disabled = !hoveredTile.data.disabled;
+			if ( hoveredTile.data.disabled ) stats.Work -= hoveredTile.typeData.fx.Work;
+			else this.designateWorkOrDisableTile(hoveredTile);
+			console.log(hoveredTile.data.disabled, stats.Work);
+		}
+	},
+
+	designateWorkOrDisableTile: function(tile) {
+		if (tile.typeData.fx && tile.typeData.fx.Work && !tile.data.disabled)
+		{
+			if ( !tile.data.workLeft && stats.Work + tile.typeData.fx.Work < 0 ) tile.data.disabled = true;
+			else stats.Work += tile.typeData.fx.Work;
+		}
+
 	},
 
 	clickedTool: function(tool, ptr) {

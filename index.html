@@ -46,10 +46,10 @@
 	<script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
 
 	<div id="vue-app">
- 		<b-btn id="tileInfoLauncher" v-b-modal.tileinfo @click="setHoveredTile" style="display:none;"></b-btn>
+ 		<b-btn id="tileInfoLauncher" @click="clickTile" style="display:none;"></b-btn>
 
 		<!-- Modal Component -->
-		<b-modal id="tileinfo" v-bind:title="hoveredTile.name" hide-footer>
+		<b-modal id="tileinfo" ref="tileinfo" v-bind:title="hoveredTile.name" hide-footer>
 			<img v-bind:src="spriteData[hoveredTile.name]">
 			<br>
 			<b-button size="sm" variant="outline-primary">-</b-button>

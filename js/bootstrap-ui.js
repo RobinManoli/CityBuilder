@@ -51,19 +51,34 @@ function modalFunc(tile_name)
 	}
 	*/
 	
-	setTimeout(	function(){ $('#tile-info .modal').modal('toggle'); }, 0); // delay before showing the modal, so that there is time to see if the correct tile was tapped (if it was tapped on mobile)
+	setTimeout( function(){ $('#tile-info .modal').modal('toggle'); }, 0); // delay before showing the modal, so that there is time to see if the correct tile was tapped (if it was tapped on mobile)
 }
 
  window.app = new Vue({
 	el: "#vue-app",
 	data: {
+		gameFuncs: game.state.states.Boot,
 		hoveredTile: {},
 		spriteData: spriteData,
 	},
 	methods: {
 		setHoveredTile() {
 			this.hoveredTile = hoveredTile ? hoveredTile: {};
-		}
+		},
+		clickTile() {
+				var instance = this;
+				this.setHoveredTile();
+				if (clickTimer)
+				{
+					// double click occured, since a click happened when there exists a timeout from an earlier click
+					//console.log('dlick', game);
+					clearTimeout(clickTimer);
+					clickTimer = false;
+					this.gameFuncs.enableDisableTile();
+				}
+				else
+					clickTimer = setTimeout( function(){ instance.$refs.tileinfo.show(); clickTimer=false }, 500 );
+		},
 	}
 	})
 
