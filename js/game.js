@@ -20,7 +20,7 @@ var cursorPos, cursorTool, clickTimer;
 var slider, sliderX, sliderYMin, sliderYMax;
 
 var keyEsc;
-//var keySpace;
+var keySpace;
 //var keyShift;
 //var shiftDown = false;
 
