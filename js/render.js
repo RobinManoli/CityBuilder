@@ -90,9 +90,5 @@ function renderFunc(game)
 	else
 		toolTipBackground.x = 999999;
 
-	if (roundFinished)
-	{
-		game.debug.geom( roundFinishedBackground, 'rgba(0,0,255,0.3)');
-		game.debug.text("Round " + nRound + " finished", game.width/2 - 90, 105);
-	}
+	if (!animatingShowAllTiles) game.debug.text("Finish Round " + nRound, sliderX + 30, 115);
 }

@@ -10,7 +10,7 @@ var tileSize = 42; // half of pixelsize, so half image is drawn in front of othe
 var toolTiles = [];
 var hoveredTile; // current tile being hovered
 
-var roundFinishedBackground;
+var roundFinishedSprite;
 var toolTipBackground;
 var displayedStats = [];
 var displayedStatsTimeStamp = 0;
@@ -25,7 +25,6 @@ var keyEsc;
 //var shiftDown = false;
 
 //var Work = 1;
-var roundFinished = false;
 var nRound = 1;
 
 var animatingShowAllTiles = false;
@@ -154,22 +153,20 @@ BasicGame.Boot.prototype = {
 
 	startRound: function() {
 		var instance = this;
-		if (roundFinished)
-		{
-			stats.Work += stats.Population;
-			nRound++;
-			roundFinished = false;
-			animatingShowAllTiles = false; // show all tiles when animating until pressing space
+		//console.log("starting round:", nRound);
+		stats.Work = stats.Population;
+		nRound++;
+		roundFinished = false;
+		animatingShowAllTiles = false; // show all tiles when animating until pressing space
 
-			// remove designated work from workforce, and disable tiles if necessary
-			isoGroup.forEach( function(tile) {
-				instance.designateWorkOrDisableTile(tile);
-			});
-		}
+		// remove designated work from workforce, and disable tiles if necessary
+		isoGroup.forEach( function(tile) {
+			instance.designateWorkOrDisableTile(tile);
+		});
 	},
 
 	finishRound: function() {
-		//console.log("finishing round:", roundFinished);
+		//console.log("finishing round:", nRound);
 		var instance = this;
 
 		// apply effects
@@ -182,11 +179,12 @@ BasicGame.Boot.prototype = {
 			}
 		});
 
-		this.addGarbage();
+		if (stats.Garbage) this.addGarbage();
 
 		// after all animations are done
-		game.time.events.add(250 * stats.Garbage, function(){
-			roundFinished = true;
+		game.time.events.add(250 * (stats.Garbage || 0), function(){
+			//console.log("round finished:", nRound);
+			this.startRound();
 		}, this);
 
 	},
@@ -262,7 +260,6 @@ BasicGame.Boot.prototype = {
 		//console.log('clickedTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
 		//console.log('clickedTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
-		if (roundFinished) return; // don't do anything when clicking a tile until next round has started
 
 		if (hoveredTile)
 		{
@@ -312,8 +309,6 @@ BasicGame.Boot.prototype = {
 
 		// unhide tools 
 		this.unhideTools();
-		if (stats.Work == 0) this.finishRound();
-		
 	},
 
 	enableDisableTile: function() {

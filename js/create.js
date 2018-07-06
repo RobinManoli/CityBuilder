@@ -46,7 +46,7 @@ function createFunc(game)
 
 	// (non sprite/clickable object) clicks
 	// click anywhere
-	window.addEventListener("click", function(){ if (!hoveredTile) instance.startRound()});
+	//window.addEventListener("click", function(){ if (!hoveredTile) instance.startRound()});
 
 	// tool ui
 	// cursor
@@ -64,9 +64,16 @@ function createFunc(game)
 	}
 
 	toolTipBackground = new Phaser.Rectangle( 0, 0, 400, 300 ) ;
-	roundFinishedBackground = new Phaser.Rectangle( game.width/2 - 200, 80, 400, 40 ) ;
+	//roundFinishedSprite = new Phaser.Rectangle( game.width/2 - 200, 80, 400, 40 ) ;
 
-
+	var roundFinishedRect = game.add.graphics(999999, 999999);
+	roundFinishedRect.beginFill(0x0000FF);
+	roundFinishedRect.drawRect(0, 0, 200, 40);
+	roundFinishedSprite = game.add.sprite(sliderX, 80, roundFinishedRect.generateTexture());
+	roundFinishedSprite.alpha = 0.6;
+	roundFinishedSprite.inputEnabled = true;
+	roundFinishedSprite.events.onInputDown.add( instance.finishRound, this);
+	
 	var sliderRect = game.add.graphics(999999, 999999);
 	sliderRect.beginFill(0x0000FF);
 	sliderRect.drawRect(0, 0, 30, tileSize * 2);
