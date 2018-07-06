@@ -82,7 +82,7 @@ BasicGame.Boot.prototype = {
 			//game.debug.text( name, game.width - tileSize, yy + tileSize + 15 );
 			sprite.name = name;
 			sprite.inputEnabled = true;
-			sprite.events.onInputDown.add(this.clickedTool, this);
+			sprite.events.onInputDown.add(this.clickTool, this);
 			toolTiles.push( name );
 
 			game.add.tween(sprite.scale).from({
@@ -203,8 +203,10 @@ BasicGame.Boot.prototype = {
 		{
 			tile.data.workLeft = 0;
 			tile.typeData.count++;
+			tile.typeData.tiles.push(tile);
 			tile.alpha = 1
 			this.applyFx( tile.typeData.cost );
+			this.designateWorkOrDisableTile( tile );
 		}
 		else
 		{
@@ -230,7 +232,7 @@ BasicGame.Boot.prototype = {
 	},
 
 	unhideTools: function() {
-		//console.log();
+		//console.log("unhiding tools");
 		for (var tile_name in tileTypeData)
 		{
 			var outer_continue = false;
@@ -280,7 +282,6 @@ BasicGame.Boot.prototype = {
 						//game.iso.simpleSort(isoGroup); // needed when added tile doesn't display correctly in 3D space
 
 						this.applyWork( gridTile, 1 );
-						this.designateWorkOrDisableTile( gridTile );
 					}
 				}
 			}
@@ -301,7 +302,7 @@ BasicGame.Boot.prototype = {
 			}
 		}
 
-		// unhide tools 
+		// unhide tools
 		this.unhideTools();
 	},
 
@@ -312,7 +313,7 @@ BasicGame.Boot.prototype = {
 			hoveredTile.data.disabled = !hoveredTile.data.disabled;
 			if ( hoveredTile.data.disabled ) stats.Work -= hoveredTile.typeData.fx.Work;
 			else this.designateWorkOrDisableTile(hoveredTile);
-			console.log(hoveredTile.data.disabled, stats.Work);
+			//console.log(hoveredTile.data.disabled, stats.Work);
 		}
 	},
 
@@ -325,8 +326,8 @@ BasicGame.Boot.prototype = {
 
 	},
 
-	clickedTool: function(tool, ptr) {
-		//console.log('clickedTool:', tool, cursorTool);
+	clickTool: function(tool, ptr) {
+		//console.log('clickTool:', tool, cursorTool);
 		if ( !cursorTool ) cursorTool = game.add.sprite( game.input.mousePointer.x, game.input.mousePointer.y, tool.name );
 		else
 		{
