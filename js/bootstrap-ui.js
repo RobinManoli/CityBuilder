@@ -77,7 +77,7 @@ function modalFunc(tile_name)
 					this.gameFuncs.enableDisableTile();
 				}
 				else
-					clickTimer = setTimeout( function(){ instance.$refs.tileinfo.show(); clickTimer=false }, 500 );
+					clickTimer = setTimeout( function(){ instance.$refs.tileinfo.show(); clickTimer=false }, 300 );
 		},
 	}
 	})

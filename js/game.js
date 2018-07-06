@@ -263,11 +263,11 @@ BasicGame.Boot.prototype = {
 
 		if (hoveredTile)
 		{
-			if (stats.Work >= 1)
+			//console.log("clickedTile", hoveredTile, tile);
+			// click tile with active tool
+			if (cursorTool && cursorTool.alive)
 			{
-				//console.log("clickedTile", hoveredTile, tile);
-				// click tile with active tool/building
-				if (cursorTool && cursorTool.alive)
+				if (stats.Work >= 1)
 				{
 					var replacedTileType = tileTypeData[ hoveredTile.name ];
 					var replacingTileType = tileTypeData[ cursorTool.name ];
@@ -283,27 +283,21 @@ BasicGame.Boot.prototype = {
 						this.designateWorkOrDisableTile( gridTile );
 					}
 				}
+			}
 
-				// clicked tile with no tool active
-				else if ( hoveredTile.data.workLeft )
+			// click tile without active tool
+			else
+			{
+				//console.log(clickTimer);
+				//modalFunc( hoveredTile.name );
+				if ( stats.Work >= 1 && hoveredTile.data.workLeft )
 				{
 					// add work points to building
 					this.applyWork(hoveredTile, 1);
 				}
-			}
-
-			// tile is already built, perform click effects
-			if (!cursorTool || !cursorTool.alive)
-			{
-				//console.log(clickTimer);
-				if ( hoveredTile.typeData.click )
-				{
-					//console.log("applying click fx for:", hoveredTile);
-					//this.applyFx( hoveredTile.typeData.click );
-					//stats.Work--;
-				}
-				//modalFunc( hoveredTile.name );
-				document.getElementById('tileInfoLauncher').click();
+				else
+					// show tileinfo or doubleclick
+					document.getElementById('tileClicker').click();
 			}
 		}
 
