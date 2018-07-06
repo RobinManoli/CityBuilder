@@ -45,7 +45,7 @@ BasicGame.Boot.prototype = {
 		//tile.scale.set(1.5, 1.5); // don't scale this as it messes up tile highlighting
 		tile.anchor.set(0.5);
 		tile.inputEnabled = true;
-		tile.events.onInputDown.add(this.clickedTile, this);
+		tile.events.onInputDown.add(this.clickTile, this);
 		tile.name = name;
 		tile.data = {}; // this object should exist on later versions of phaser
 		tile.data.x = xx;
@@ -256,14 +256,14 @@ BasicGame.Boot.prototype = {
 		}
 	},
 
-	clickedTile: function(tile, ptr) {
-		//console.log('clickedTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
-		//console.log('clickedTile:', hoveredTile);
+	clickTile: function(tile, ptr) {
+		//console.log('clickTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
+		//console.log('clickTile:', hoveredTile);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
 		if (hoveredTile)
 		{
-			//console.log("clickedTile", hoveredTile, tile);
+			//console.log("clickTile", hoveredTile, tile);
 			// click tile with active tool
 			if (cursorTool && cursorTool.alive)
 			{
