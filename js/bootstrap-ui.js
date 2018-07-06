@@ -60,10 +60,12 @@ function modalFunc(tile_name)
 		gameFuncs: game.state.states.Boot,
 		hoveredTile: {},
 		spriteData: spriteData,
+		tileEnabled: false,
 	},
 	methods: {
 		setHoveredTile() {
-			this.hoveredTile = hoveredTile ? hoveredTile: {};
+			this.hoveredTile = hoveredTile || {};
+			this.tileEnabled = !hoveredTile.data.disabled || false;
 		},
 		clickTile() {
 				var instance = this;
@@ -78,6 +80,22 @@ function modalFunc(tile_name)
 				}
 				else
 					clickTimer = setTimeout( function(){ instance.$refs.tileinfo.show(); clickTimer=false }, 300 );
+		},
+		updateTileEnabled() {
+			console.log( this.hoveredTile.data.disabled, this.tileEnabled);
+			this.gameFuncs.enableDisableTile();
+			if (this.tileEnabled == this.hoveredTile.data.disabled )
+			{
+				// toggle back value here, if enabling is not possible
+				// tried millions of things, none working
+
+				//console.log( this.$refs.tileEnabledCheckbox.$el.checked );
+				//console.log('re-clicked');
+				//this.tileEnabled = !this.tileEnabled;
+				//this.$refs.tileEnabledCheckbox.$el.click();
+			}
+			console.log( this.hoveredTile.data.disabled, this.tileEnabled );
+			//console.log( this.$refs.tileEnabledCheckbox );
 		},
 	}
 	})
