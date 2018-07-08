@@ -19,13 +19,13 @@ function updateFunc(game)
 		// If it does, do a little animation and tint change.
 		if (!tile.selected && inBounds) {
 			tile.selected = true;
-			tile.tint = 0x86bfda;
+			//tile.tint = 0x86bfda;
 			game.add.tween(tile).to({ isoZ: 4 + tile.data.z * tileSize}, 200, Phaser.Easing.Quadratic.InOut, true);
 		}
 		// If not, revert back to how it was.
 		else if (tile.selected && !inBounds) {
 			tile.selected = false;
-			tile.tint = 0xffffff;
+			//tile.tint = 0xffffff;
 			game.add.tween(tile).to({ isoZ: 0 + tile.data.z * tileSize}, 200, Phaser.Easing.Quadratic.InOut, true);
 		}
 
@@ -35,14 +35,23 @@ function updateFunc(game)
 			hoveredTile = tile;
 		}
 
-		if ( !tile.selected && tile.data.workLeft )
+		if ( tile.data.workLeft )
 		{
 			//console.log( tile );
 			tile.tint = 0xffff00;
 		}
-		else if ( !tile.selected && tile.data.disabled )
+		else if ( tile.data.disabled )
 		{
 			tile.tint = 0x999999;
+		}
+		else if ( tile != hoveredTile )
+		{
+			// tile remained tinted until hovered if it was shaded and then enabled inside the modal, so reset it here
+			tile.tint = 0xffffff;
+		}
+		else if ( tile == hoveredTile )
+		{
+			tile.tint = 0x86bfda;
 		}
 
 		// make all tiles on z == 0 (and their buildings on top) nearer than cursor's y position hide
