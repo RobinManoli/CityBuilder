@@ -49,10 +49,10 @@
  		<b-btn id="tileClicker" @click="clickTile" style="display:none;"></b-btn>
 
 		<!-- Modal Component -->
-		<b-modal id="tileinfo" ref="tileinfo" v-bind:title="hoveredTile.name" hide-footer>
-			<img v-bind:src="spriteData[hoveredTile.name]">
+		<b-modal id="tileinfo" ref="tileinfo" v-bind:title="clickedTile.name" hide-footer>
+			<img v-bind:src="spriteData[clickedTile.name]">
 			<br>
-			<b-button v-show="hoveredTile && hoveredTile.typeData && hoveredTile.typeData.disablable" v-bind:variant="conditionalPressedButtonVariant(tileEnabled)" :pressed="tileEnabled" @click="updateTileEnabled()">Employ</b-button>
+			<b-button v-show="clickedTile && clickedTile.typeData && clickedTile.typeData.disablable" v-bind:variant="buttonOnOff(tileEnabled)" :pressed="tileEnabled" @click="updateTileEnabled()">Employ</b-button>
 
 			<!--<b-button size="sm" variant="outline-primary">-</b-button>
 			<b-button size="sm" variant="outline-primary">+</b-button>-->

@@ -2,6 +2,13 @@ https://www.manoli.se/designs/green-city/
 
 update manoli.se favicon as it looks like a no-traffic sign
 
+fix
+
+tooltips/hover tile - give computer hints
+	press v to select village tool
+	double click to enable
+	mouse "no" if cannot place building, or maybe text that says click to view info
+
 clean up
 	tooltips (commented code) - though might want hovering info with keyboard shortcuts
 	bootstrap modal vanilla-js or bootstrap-vue
@@ -15,6 +22,7 @@ optimization
 	test remove jquery if using bootstrap-vue
 
 ipad acclimatization
+	when creating toolkit, have drag in mind -- or when creating drag, remake toolkit
 	add clickable objects before keyboard shortcuts
 	drag tool to place it, but if it's difficult to drag don't place it - instead create a place tool with arrows around to easily move the placement to the side
 	highlight selected tool

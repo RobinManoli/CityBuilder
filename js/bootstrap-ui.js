@@ -58,18 +58,19 @@ function modalFunc(tile_name)
 	el: "#vue-app",
 	data: {
 		gameFuncs: game.state.states.Boot,
-		hoveredTile: {},
+		clickedTile: {},
 		spriteData: spriteData,
 		tileEnabled: false,
 	},
 	methods: {
-		setHoveredTile() {
-			this.hoveredTile = hoveredTile || {};
-			this.tileEnabled = !hoveredTile.data.disabled || false;
+		setClickedTile() {
+			this.clickedTile = clickedTile || {};
+			this.tileEnabled = !clickedTile.data.disabled || false;
 		},
 		clickTile() {
+				// a tile was clicked
 				var instance = this;
-				this.setHoveredTile();
+				this.setClickedTile();
 				if (clickTimer)
 				{
 					// double click occured, since a click happened when there exists a timeout from an earlier click
@@ -81,15 +82,16 @@ function modalFunc(tile_name)
 				else
 					clickTimer = setTimeout( function(){ instance.$refs.tileinfo.show(); clickTimer=false }, 300 );
 		},
-		conditionalPressedButtonVariant( val ){
+		buttonOnOff( val ){
 			// returns a button variant (color) that visibly holds button pressed or unpressed
 			if (val) return "success"
 			return "outline-danger"
 		},
 		updateTileEnabled() {
-			console.log( this.hoveredTile.data.disabled, this.tileEnabled );
+			// the Employ button was pressed
+			//console.log( this.clickedTile.data );
 			this.gameFuncs.enableDisableTile();
-			this.tileEnabled = !this.hoveredTile.data.disabled;
+			this.tileEnabled = !this.clickedTile.data.disabled;
 			if (this.tileEnabled) this.tileEnabledVariant = "outline-primary";
 			else this.tileEnabledVariant = "outline-success";
 		},

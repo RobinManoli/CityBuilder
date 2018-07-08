@@ -8,7 +8,7 @@ var isoGroup;
 var tileGrid = []; // all tiles in a 3D-tensor
 var tileSize = 42; // half of pixelsize, so half image is drawn in front of other tile, + 2 so corner of front tile does not cover back tile
 var toolTiles = [];
-var hoveredTile; // current tile being hovered
+var hoveredTile, clickedTile; // current tile being hovered, last clicked
 
 var roundFinishedSprite;
 var toolTipBackground;
@@ -83,6 +83,10 @@ BasicGame.Boot.prototype = {
 			sprite.name = name;
 			sprite.inputEnabled = true;
 			sprite.events.onInputDown.add(this.clickTool, this);
+			sprite.input.enableDrag(); // works only on sprites
+			sprite.events.onDragStop.add(this.clickTile, this);
+
+
 			toolTiles.push( name );
 
 			game.add.tween(sprite.scale).from({
@@ -154,7 +158,7 @@ BasicGame.Boot.prototype = {
 	startRound: function() {
 		var instance = this;
 		//console.log("starting round:", nRound);
-		stats.Work = stats.Population;
+		if (stats.Population) stats.Work = stats.Population; // if population is not yet set, if no residence is placed, don't set work to undefined
 		nRound++;
 		roundFinished = false;
 		animatingShowAllTiles = false; // show all tiles when animating until pressing space
@@ -260,11 +264,14 @@ BasicGame.Boot.prototype = {
 
 	clickTile: function(tile, ptr) {
 		//console.log('clickTile:', tile); //this is the clicked tile according to phaser/iso plugin, which is often wrong, so use hoveredTile to be sure
-		//console.log('clickTile:', hoveredTile);
+		//console.log('clickTile:', hoveredTile, stats.Work);
 		//hoveredTile.destroy(); // for testing that correct tile is accessed when clicked
 
 		if (hoveredTile)
 		{
+			// since modal is delayed, the hovered tile might change before showing the modal, which makes a possible new hoverdTile irrelevant to the eariler click
+			clickedTile = hoveredTile;
+
 			//console.log("clickTile", hoveredTile, tile);
 			// click tile with active tool
 			if (cursorTool && cursorTool.alive)
@@ -307,13 +314,13 @@ BasicGame.Boot.prototype = {
 	},
 
 	enableDisableTile: function() {
-		//console.log('enableDisableTile', hoveredTile, hoveredTile.typeData.disablable);
-		if (hoveredTile && hoveredTile.typeData.disablable)
+		//console.log('enableDisableTile', clickedTile, clickedTile.typeData.disablable);
+		if (clickedTile && clickedTile.typeData.disablable)
 		{
-			hoveredTile.data.disabled = !hoveredTile.data.disabled;
-			if ( hoveredTile.data.disabled ) stats.Work -= hoveredTile.typeData.fx.Work;
-			else this.designateWorkOrDisableTile(hoveredTile);
-			//console.log(hoveredTile.data.disabled, stats.Work);
+			clickedTile.data.disabled = !clickedTile.data.disabled;
+			if ( clickedTile.data.disabled ) stats.Work -= clickedTile.typeData.fx.Work;
+			else this.designateWorkOrDisableTile(clickedTile);
+			//console.log(clickedTile.data.disabled, stats.Work);
 		}
 	},
 
